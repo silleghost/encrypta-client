@@ -4,7 +4,7 @@ module.exports = {
   mode: "development",
   entry: "./src/index.js",
   output: {
-    path: `${__dirname}/dist`,
+    path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
   module: {
@@ -19,13 +19,27 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.wasm$/,
+        loader: "base64-loader",
+        type: "javascript/auto",
+      },
     ],
+  },
+  resolve: {
+    fallback: {
+      path: false,
+      fs: false,
+      Buffer: false,
+      process: false,
+    },
   },
   devServer: {
     static: {
       directory: path.join(__dirname, "public"),
       serveIndex: true,
     },
+    historyApiFallback: true,
     compress: true,
     port: 3000,
   },
