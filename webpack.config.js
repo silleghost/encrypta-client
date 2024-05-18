@@ -24,6 +24,11 @@ module.exports = {
         loader: "base64-loader",
         type: "javascript/auto",
       },
+
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
     ],
   },
   resolve: {
