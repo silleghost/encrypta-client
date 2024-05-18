@@ -64,15 +64,16 @@ export const userLogin = async (
 
   let data = await response.json();
 
-  console.log(response.data);
-
   if (response.status === 200) {
     setAuthTokens(data);
     setUser(data);
     history("/");
+    return { status: response.status, data };
+  } else if (response.status === 401 && data.message === "Введите TOTP код") {
+    throw new Error("Введите TOTP код");
+  } else {
+    throw new Error("Неправильный логин или пароль");
   }
-
-  return { status: response.status, data };
 };
 
 //Функция обновления токена

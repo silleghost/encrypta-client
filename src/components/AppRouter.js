@@ -4,7 +4,6 @@ import { privateRoutes, publicRoutes } from "../router";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import PrivateRoute from "../utils/PrivateRoute";
 import PublicRoute from "../utils/PublicRoute";
-import NotFoundPage from "../pages/NotFoundPage";
 
 const AppRouter = () => {
   return (
@@ -29,7 +28,7 @@ const AppRouter = () => {
             />
           ))}
 
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
