@@ -1,0 +1,12 @@
+.empty-vault-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+.empty-vault-text {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+}
