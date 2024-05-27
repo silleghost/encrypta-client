@@ -6,6 +6,7 @@ import TotpInput from "../components/TotpInput";
 import "./LoginPage.css";
 
 import { AuthContext } from "../context/AuthContext";
+import { deriveKey } from "../crypto";
 
 const LoginPage = () => {
   const { userLogin } = useContext(AuthContext);
@@ -14,10 +15,13 @@ const LoginPage = () => {
 
   const [showTotpInput, setShowTotpInput] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       await userLogin(username, password, null);
+      navigate("/vault");
     } catch (error) {
       if (error.message === "Введите TOTP код") {
         setShowTotpInput(true);
@@ -31,8 +35,11 @@ const LoginPage = () => {
     try {
       await userLogin(username, password, totpCode);
       setShowTotpInput(false);
+      navigate("/vault");
     } catch (error) {
-      console.error("Ошибка при отправке TOTP кода", error);
+      if (error.message === "Введите TOTP код") {
+        alert("Введите корректный код");
+      }
     }
   };
 
