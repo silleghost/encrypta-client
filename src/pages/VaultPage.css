@@ -1,0 +1,52 @@
+.password-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.password-record {
+  display: flex;
+  align-items: center;
+  background-color: #f2f2f2;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.record-icon {
+  margin-right: 10px;
+}
+
+.record-name a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.record-password input {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.password-toggle,
+.password-copy {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.add-button {
+  position: relative;
+}
+
+.add-menu {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  display: none;
+}
+
+.add-button:hover .add-menu {
+  display: block;
+}
