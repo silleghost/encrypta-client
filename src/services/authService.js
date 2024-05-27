@@ -7,13 +7,7 @@ import {
 } from "../config";
 
 //Функция регистрации
-export const userRegister = async (
-  username,
-  email,
-  password,
-  userLogin,
-  history
-) => {
+export const userRegister = async (username, email, password, userLogin) => {
   let requestBody = {
     username: username,
     password: password,
@@ -33,7 +27,7 @@ export const userRegister = async (
   console.log(response.data);
 
   if (response.status === 201) {
-    userLogin(username, password, null, history);
+    userLogin(username, password, null);
   } else {
     alert("Неудачная регистрация");
   }
@@ -45,8 +39,7 @@ export const userLogin = async (
   password,
   totpCode,
   setAuthTokens,
-  setUser,
-  history
+  setUser
 ) => {
   let requestBody = {
     username: username,
@@ -67,7 +60,6 @@ export const userLogin = async (
   if (response.status === 200) {
     setAuthTokens(data);
     setUser(data);
-    history("/");
     return { status: response.status, data };
   } else if (response.status === 401 && data.message === "Введите TOTP код") {
     throw new Error("Введите TOTP код");
