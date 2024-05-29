@@ -1,0 +1,110 @@
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #374151;
+}
+
+.modal-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-close-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6b7280;
+}
+
+.new-record-form {
+  display: flex;
+  flex-direction: column;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.form-content {
+  flex-grow: 1;
+  padding: 3px;
+}
+
+.form-row {
+  display: flex;
+  gap: 2rem; /* Отступ между элементами */
+  margin-bottom: 1rem; /* Отступ снизу ряда */
+}
+
+.form-row > * {
+  flex: 1; /* Распределение оставшегося пространства поровну */
+  width: 100%; /* Занимать всю доступную ширину */
+}
+
+.form-field {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-size: 1rem; /* 14px */
+  font-weight: 500;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 0.25rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid #d1d5db;
+}
+
+.save-button {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #6b7280;
+  color: #fff;
+  border: 2px solid transparent;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #4b5563;
+}
+
+.delete-form {
+  display: flex;
+  align-items: center;
+}
+
+.delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: 3px solid #f87171;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.delete-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #f87171;
+}

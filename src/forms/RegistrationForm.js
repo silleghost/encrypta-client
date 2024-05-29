@@ -32,7 +32,11 @@ const RegistrationForm = ({ onRegistration, onError }) => {
   };
 
   return (
-    <form className="registration-form" onSubmit={handleRegistration}>
+    <form
+      className="registration-form"
+      onSubmit={handleRegistration}
+      autoComplete="off"
+    >
       <div className="form-group">
         <MyInput
           type="text"
@@ -55,6 +59,7 @@ const RegistrationForm = ({ onRegistration, onError }) => {
           name="password1"
           placeholder="Пароль"
           onChange={(e) => setPasword1(e.target.value)}
+          autoComplete="new-password"
         />
       </div>
       <div className="form-group">
@@ -63,6 +68,7 @@ const RegistrationForm = ({ onRegistration, onError }) => {
           name="password2"
           placeholder="Повторите пароль"
           onChange={(e) => setPasword2(e.target.value)}
+          autoComplete="new-password"
         />
       </div>
 

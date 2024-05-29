@@ -1,4 +1,4 @@
-.my-input {
+.my-select {
   display: block;
   width: 100%;
   padding: 0.75rem 1rem;
@@ -12,7 +12,7 @@
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.my-input:focus {
+.my-select:focus {
   color: #495057;
   background-color: #fff;
   border-color: #80bdff;

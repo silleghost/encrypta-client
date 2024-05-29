@@ -1,5 +1,5 @@
 import React from "react";
-import EmptyVault from "./EmptyVault";
+import EmptyVault from "../EmptyVault/EmptyVault";
 
 const PasswordList = ({ records }) => (
   <div>

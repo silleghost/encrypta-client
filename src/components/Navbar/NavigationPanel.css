@@ -1,5 +1,5 @@
 .container {
-  background-color: #455a64; /* bg-slate-500 */
+  background-color: rgb(100 116 139); /* bg-slate-500 */
   padding: 0;
 }
 
@@ -11,6 +11,8 @@
 
 .leftSection {
   padding-left: 1rem;
+  padding-top: 4px;
+  padding-bottom: 4px;
   margin: 0 auto;
   display: flex;
   align-items: center;

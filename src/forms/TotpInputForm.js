@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import MyInput from "./UI/input/MyInput";
-import MyButton from "./UI/button/MyButton";
+import MyInput from "../components/UI/input/MyInput";
+import MyButton from "../components/UI/button/MyButton";
 import "../pages/LoginPage.css";
 
-const TotpInput = ({ onSubmit }) => {
+const TotpInputForm = ({ onSubmit }) => {
   const [totpCode, setTotpCode] = useState("");
 
   const handleSubmit = (e) => {
@@ -28,4 +28,4 @@ const TotpInput = ({ onSubmit }) => {
   );
 };
 
-export default TotpInput;
+export default TotpInputForm;

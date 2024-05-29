@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import TotpInput from "../components/TotpInput";
+import TotpInput from "../forms/TotpInputForm";
 import LoginForm from "../forms/LoginForm";
 import "./LoginPage.css";
 
