@@ -29,7 +29,7 @@ export const userRegister = async (username, email, password, userLogin) => {
   if (response.status === 201) {
     userLogin(username, password, null);
   } else {
-    alert("Неудачная регистрация");
+    throw new Error("Неудачная регистрация");
   }
 };
 
