@@ -10,9 +10,9 @@ export const publicRoutes = [
   { path: "/login", element: <LoginPage />, exact: true },
   { path: "/registration", element: <RegistrationPage />, exact: true },
   { path: "/404", element: <NotFoundPage />, exact: true },
-  { path: "/logout", element: <UserLogout />, exact: true },
 ];
 
 export const privateRoutes = [
   { path: "/vault", element: <VaultPage />, exact: true },
+  { path: "/logout", element: <UserLogout />, exact: true },
 ];

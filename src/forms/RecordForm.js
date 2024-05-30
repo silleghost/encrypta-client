@@ -39,7 +39,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
       id="record-form"
     >
       <div className="form-content">
-        <input type="hidden" value={record.id} name="id" />
+        {/* <input type="hidden" value={record.id} name="id" /> */}
         <div className="form-row">
           <div className="form-field">
             <label>Название приложения</label>

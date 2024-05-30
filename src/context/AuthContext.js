@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       userRegister(username, email, password, (username, password, totpCode) =>
         userLogin(username, password, totpCode, setAuthTokens, setUser)
       ),
-    userLogout: () => userLogout(setAuthTokens, setUser, history),
+    userLogout: () => userLogout(setAuthTokens, setUser),
   };
 
   return (

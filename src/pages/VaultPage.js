@@ -9,16 +9,19 @@ import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
 import ErrorNotification from "../components/UI/notification/ErrorNotification";
 import NewElementButton from "../components/UI/select/OptionsSelect";
+import { createRecord, updateRecord } from "../services/vaultService";
 
 const VaultPage = () => {
   const { isLoading, records, error, fetchRecords } = useFetchRecords();
   const { setRecords } = useContext(VaultContext);
   const [modal, setModal] = useState(false);
 
+  //Загружаем записи при загрузке страницы
   useEffect(() => {
     fetchRecords();
   }, []);
 
+  //Записываем записи для дальнейшего использования
   useEffect(() => {
     setRecords(records);
   }, []);
@@ -42,9 +45,29 @@ const VaultPage = () => {
     setModal(false);
   };
 
-  const handleSaveRecord = (record) => {
-    console.log("Будет сохранена следующая запись:", record);
-    setModal(false);
+  const handleSaveRecord = async (record) => {
+    try {
+      const isNewRecord = !record.id;
+      const response = isNewRecord
+        ? await createRecord(record)
+        : await updateRecord(record);
+
+      console.log("Запись сохранена:", response.data);
+      setRecords((prevRecords) => {
+        if (isNewRecord) {
+          return [...prevRecords, response.data];
+        } else {
+          return prevRecords.map((r) =>
+            r.id === record.id ? response.data : r
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Ошибка при сохранении записи:", error);
+      // handleError(error.message);
+    } finally {
+      setModal(false);
+    }
   };
 
   const handleDeleteRecord = (record) => {

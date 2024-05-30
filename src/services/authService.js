@@ -24,8 +24,6 @@ export const userRegister = async (username, email, password, userLogin) => {
 
   let data = await response.json();
 
-  console.log(response.data);
-
   if (response.status === 201) {
     userLogin(username, password, null);
   } else {
@@ -108,5 +106,4 @@ export const updateToken = async (
 export const userLogout = (setAuthTokens, setUser, history) => {
   setAuthTokens(null);
   setUser(null);
-  history("/login");
 };
