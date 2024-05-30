@@ -2,8 +2,8 @@ import React, { useContext } from "react";
 import EmptyVault from "../EmptyVault/EmptyVault";
 import { VaultContext } from "../../../context/VaultContext";
 
-const PasswordList = ({ records }) => {
-  // const { records } = useContext(VaultContext);
+const PasswordList = () => {
+  const { records } = useContext(VaultContext);
 
   return (
     <div>

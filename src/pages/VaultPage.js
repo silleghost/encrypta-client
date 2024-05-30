@@ -3,7 +3,6 @@ import "./LoginPage.css";
 import NavigationPanel from "../components/Navbar/NavigationPanel";
 import { VaultContext } from "../context/VaultContext";
 import PasswordList from "../components/Vault/PasswordList/PasswordList";
-import { useFetchRecords } from "../hooks/useFetchRecords";
 import Loading from "../components/UI/loading/Loading";
 import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
@@ -12,26 +11,16 @@ import NewElementButton from "../components/UI/select/OptionsSelect";
 import { createRecord, updateRecord } from "../services/vaultService";
 
 const VaultPage = () => {
-  const { isLoading, records, error, fetchRecords } = useFetchRecords();
-  const { setRecords } = useContext(VaultContext);
+  const { setRecords, isLoading, error: vaultError } = useContext(VaultContext);
   const [modal, setModal] = useState(false);
-
-  //Загружаем записи при загрузке страницы
-  useEffect(() => {
-    fetchRecords();
-  }, []);
-
-  //Записываем записи для дальнейшего использования
-  useEffect(() => {
-    setRecords(records);
-  }, []);
+  const [errors, setErrors] = useState([]);
 
   const handleError = (errorMessage) => {
-    setError(errorMessage);
+    setErrors((prevErrors) => [...prevErrors, errorMessage]);
   };
 
-  const handleCloseError = () => {
-    setError(null);
+  const handleCloseError = (index) => {
+    setErrors((prevErrors) => prevErrors.filter((_, i) => i !== index));
   };
 
   const handleOpenModal = (event, modalName) => {
@@ -51,7 +40,6 @@ const VaultPage = () => {
       const response = isNewRecord
         ? await createRecord(record)
         : await updateRecord(record);
-
       console.log("Запись сохранена:", response.data);
       setRecords((prevRecords) => {
         if (isNewRecord) {
@@ -64,7 +52,7 @@ const VaultPage = () => {
       });
     } catch (error) {
       console.error("Ошибка при сохранении записи:", error);
-      // handleError(error.message);
+      handleError(error.message);
     } finally {
       setModal(false);
     }
@@ -76,13 +64,23 @@ const VaultPage = () => {
 
   return (
     <div>
-      <ErrorNotification
-        error={error}
-        onClose={handleCloseError}
-        autoCloseDelay={3000}
-      />
+      {errors.map((error, index) => (
+        <ErrorNotification
+          key={index}
+          error={error}
+          onClose={() => handleCloseError(index)}
+          autoCloseDelay={3000}
+        />
+      ))}
+      {vaultError && (
+        <ErrorNotification
+          error={vaultError}
+          onClose={handleCloseError}
+          autoCloseDelay={3000}
+        />
+      )}
       <NavigationPanel />
-      {isLoading ? <Loading /> : <PasswordList records={records} />}
+      {isLoading ? <Loading /> : <PasswordList />}
       <MyModal visible={modal} setVisible={setModal}>
         <RecordModal
           onSave={handleSaveRecord}
@@ -90,7 +88,6 @@ const VaultPage = () => {
           onClose={handleCloseModal}
         />
       </MyModal>
-
       <NewElementButton handleOptionSelected={handleOpenModal} />
     </div>
   );
