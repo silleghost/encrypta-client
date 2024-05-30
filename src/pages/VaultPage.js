@@ -8,10 +8,15 @@ import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
 import ErrorNotification from "../components/UI/notification/ErrorNotification";
 import NewElementButton from "../components/UI/select/OptionsSelect";
-import { createRecord, updateRecord } from "../services/vaultService";
+import {
+  createRecord,
+  deleteRecord,
+  updateRecord,
+} from "../services/vaultService";
 
 const VaultPage = () => {
   const { setRecords, isLoading, error: vaultError } = useContext(VaultContext);
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const [modal, setModal] = useState(false);
   const [errors, setErrors] = useState([]);
 
@@ -23,11 +28,17 @@ const VaultPage = () => {
     setErrors((prevErrors) => prevErrors.filter((_, i) => i !== index));
   };
 
-  const handleOpenModal = (event, modalName) => {
+  const handleOpenNewRecordModal = (event, modalName) => {
     event.preventDefault();
     if (modalName === "modal-new-record") {
       setModal(true);
+      setSelectedRecord(null);
     }
+  };
+
+  const handleOpenRecordModal = (record = null) => {
+    setModal(true);
+    setSelectedRecord(record);
   };
 
   const handleCloseModal = () => {
@@ -40,7 +51,6 @@ const VaultPage = () => {
       const response = isNewRecord
         ? await createRecord(record)
         : await updateRecord(record);
-      console.log("Запись сохранена:", response.data);
       setRecords((prevRecords) => {
         if (isNewRecord) {
           return [...prevRecords, response.data];
@@ -51,15 +61,24 @@ const VaultPage = () => {
         }
       });
     } catch (error) {
-      console.error("Ошибка при сохранении записи:", error);
       handleError(error.message);
     } finally {
       setModal(false);
     }
   };
 
-  const handleDeleteRecord = (record) => {
-    console.log("Запись удалена");
+  const handleDeleteRecord = async (recordId) => {
+    try {
+      await deleteRecord(recordId);
+
+      setRecords((prevRecords) =>
+        prevRecords.filter((record) => record.id !== recordId)
+      );
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      setModal(false);
+    }
   };
 
   return (
@@ -80,15 +99,20 @@ const VaultPage = () => {
         />
       )}
       <NavigationPanel />
-      {isLoading ? <Loading /> : <PasswordList />}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <PasswordList handleOpenModal={handleOpenRecordModal} />
+      )}
       <MyModal visible={modal} setVisible={setModal}>
         <RecordModal
+          record={selectedRecord}
           onSave={handleSaveRecord}
-          onDelete={handleDeleteRecord}
+          onDelete={() => handleDeleteRecord(selectedRecord.id)}
           onClose={handleCloseModal}
         />
       </MyModal>
-      <NewElementButton handleOptionSelected={handleOpenModal} />
+      <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
     </div>
   );
 };

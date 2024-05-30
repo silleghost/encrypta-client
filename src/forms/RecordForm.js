@@ -1,19 +1,23 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 import MyInput from "../components/UI/input/MyInput";
 import MySelect from "../components/UI/select/MySelect";
 import "../modals/RecordModal.css";
 
 const RecordForm = ({ initialRecord, categories, onSave }) => {
-  const [record, setRecord] = useState(
-    initialRecord || {
-      id: "",
-      app_name: "",
-      category: "",
-      username: "",
-      password: "",
-      url: "",
+  const [record, setRecord] = useState({
+    id: "",
+    app_name: "",
+    category: "",
+    username: "",
+    password: "",
+    url: "",
+  });
+
+  useEffect(() => {
+    if (initialRecord) {
+      setRecord(initialRecord);
     }
-  );
+  }, [initialRecord]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,7 +51,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
               type="text"
               name="app_name"
               id="app_name"
-              value={record.app_name}
+              value={record.app_name || ""}
               onChange={handleChange}
               required
             />
@@ -56,7 +60,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
             <label>Категория</label>
             <MySelect
               options={categories || []}
-              value={record.category}
+              value={record.category || ""}
               onChange={handleChangeCategory}
             />
           </div>
@@ -68,7 +72,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
               type="text"
               name="username"
               id="username"
-              value={record.username}
+              value={record.username || ""}
               onChange={handleChange}
             />
           </div>
@@ -78,7 +82,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
               type="password"
               name="password"
               id="password"
-              value={record.password}
+              value={record.password || ""}
               onChange={handleChange}
               autoComplete="new-password"
             />
@@ -91,7 +95,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
               type="text"
               name="url"
               id="url"
-              value={record.url}
+              value={record.url || ""}
               onChange={handleChange}
             />
           </div>

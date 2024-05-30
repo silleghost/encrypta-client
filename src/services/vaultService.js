@@ -55,7 +55,7 @@ export const createRecord = async (record) => {
 
 export const updateRecord = async (record) => {
   const authHeader = getAuthHeader();
-  const url = `${BASE_URL + RECORDS_URL}/${record.id}`;
+  const url = `${BASE_URL + RECORDS_URL}${record.id}/`;
 
   const response = await fetch(url, {
     method: "PUT",
@@ -74,5 +74,28 @@ export const updateRecord = async (record) => {
     throw new Error("Неавторизован");
   } else {
     throw new Error("Ошибка при обновлении записи");
+  }
+};
+
+export const deleteRecord = async (recordId) => {
+  const authHeader = getAuthHeader();
+  const url = `${BASE_URL + RECORDS_URL}${recordId}/`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+  });
+
+  const data = await response.json();
+
+  if (response.status === 204) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при удалении записи");
   }
 };

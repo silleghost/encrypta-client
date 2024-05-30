@@ -1,8 +1,10 @@
 import React, { useContext } from "react";
 import EmptyVault from "../EmptyVault/EmptyVault";
 import { VaultContext } from "../../../context/VaultContext";
+import PasswordItem from "./PasswordItem/PasswordItem";
+import "./PasswordList.css";
 
-const PasswordList = () => {
+const PasswordList = ({ handleOpenModal }) => {
   const { records } = useContext(VaultContext);
 
   return (
@@ -10,11 +12,18 @@ const PasswordList = () => {
       {records.length === 0 ? (
         <EmptyVault />
       ) : (
-        <ul>
-          {records.map((record) => (
-            <li key={record.id}>{record.app_name}</li>
-          ))}
-        </ul>
+        <div className="password-list">
+          <ul className="password-list-items">
+            {records.map((record) => (
+              <li key={record.id} className="password-list-item">
+                <PasswordItem
+                  record={record}
+                  handleOpenModal={handleOpenModal}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

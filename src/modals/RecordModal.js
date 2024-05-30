@@ -27,7 +27,11 @@ const RecordModal = ({ record, categories, onClose, onSave, onDelete }) => {
           </svg>
         </button>
       </div>
-      <RecordForm record={record} categories={categories} onSave={onSave} />
+      <RecordForm
+        initialRecord={record}
+        categories={categories}
+        onSave={onSave}
+      />
       <div className="modal-footer">
         <button form="record-form" type="submit" className="save-button">
           <span>Сохранить</span>
