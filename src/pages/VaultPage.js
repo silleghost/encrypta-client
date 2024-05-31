@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import "./LoginPage.css";
+import "./VaultPage.css";
 import NavigationPanel from "../components/Navbar/NavigationPanel";
 import { VaultContext } from "../context/VaultContext";
 import PasswordList from "../components/Vault/PasswordList/PasswordList";
@@ -16,9 +16,12 @@ import {
   deleteCategory,
 } from "../services/vaultService";
 import ErrorNotifications from "../components/Vault/ErrorNotifications";
+import SidePanel from "../components/Vault/SidePanel/SidePanel";
+import EmptyVault from "../components/Vault/EmptyVault/EmptyVault";
 
 const VaultPage = () => {
   const {
+    records,
     setRecords,
     isLoadingRecords,
     error: vaultError,
@@ -30,6 +33,16 @@ const VaultPage = () => {
   const [modalType, setModalType] = useState(null);
   const [modal, setModal] = useState(false);
   const [errors, setErrors] = useState([]);
+
+  const handleSearch = (searchTerm) => {
+    // Здесь вы можете реализовать логику поиска по записям
+    console.log("Поиск:", searchTerm);
+  };
+
+  const handleFilterCategory = (category) => {
+    // Здесь вы можете реализовать логику фильтрации по категориям
+    console.log("Фильтрация по категории:", category);
+  };
 
   const handleError = (errorMessage) => {
     setErrors((prevErrors) => [...prevErrors, errorMessage]);
@@ -160,10 +173,20 @@ const VaultPage = () => {
         handleCloseError={handleCloseError}
       />
       <NavigationPanel />
+
       {isLoadingRecords ? (
         <Loading />
+      ) : records.length === 0 ? (
+        <EmptyVault />
       ) : (
-        <PasswordList handleOpenModal={handleOpenRecordModal} />
+        <div className="main-content">
+          <SidePanel
+            categories={categories}
+            onSearch={handleSearch}
+            onFilterCategory={handleFilterCategory}
+          />
+          <PasswordList handleOpenModal={handleOpenRecordModal} />
+        </div>
       )}
       <MyModal visible={modal} setVisible={setModal}>
         <RecordModal

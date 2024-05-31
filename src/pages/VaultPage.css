@@ -1,53 +1,18 @@
-.password-list {
+.main-content {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background-color: rgb(243, 244, 246);
+  gap: 2rem;
+  padding: 0.5rem;
 }
 
-.password-record {
-  display: flex;
-  align-items: center;
-  background-color: #f2f2f2;
-  padding: 10px;
-  border-radius: 5px;
+@media (max-width: 1024px) {
+  .main-content {
+    justify-content: flex-start; /* Выравнивание элементов по левому краю */
+  }
 }
 
-.record-icon {
-  margin-right: 10px;
-}
-
-.record-name a {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-}
-
-.record-password input {
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-}
-
-.password-toggle,
-.password-copy {
-  margin-left: 10px;
-  cursor: pointer;
-}
-
-.add-button {
-  position: relative;
-}
-
-.add-menu {
-  position: absolute;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  display: none;
-}
-
-.add-button:hover .add-menu {
-  display: block;
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
 }
