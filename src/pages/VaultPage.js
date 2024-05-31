@@ -10,13 +10,18 @@ import ErrorNotification from "../components/UI/notification/ErrorNotification";
 import NewElementButton from "../components/UI/select/OptionsSelect";
 import {
   createRecord,
-  deleteRecord,
   updateRecord,
+  deleteRecord,
+  createCategory,
+  updateCategory,
+  deleteCategory,
 } from "../services/vaultService";
 
 const VaultPage = () => {
   const { setRecords, isLoading, error: vaultError } = useContext(VaultContext);
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [modalType, setModalType] = useState(null);
   const [modal, setModal] = useState(false);
   const [errors, setErrors] = useState([]);
 
@@ -31,18 +36,27 @@ const VaultPage = () => {
   const handleOpenNewRecordModal = (event, modalName) => {
     event.preventDefault();
     if (modalName === "modal-new-record") {
-      setModal(true);
+      setModalType("record");
       setSelectedRecord(null);
+      setModal(true);
+    } else if (modalName === "modal-new-category") {
+      setModalType("category");
+      setSelectedCategory(null);
+      setModal(true);
     }
   };
 
   const handleOpenRecordModal = (record = null) => {
-    setModal(true);
+    setModalType("record");
     setSelectedRecord(record);
+    setModal(true);
   };
 
   const handleCloseModal = () => {
     setModal(false);
+    setModalType(null);
+    setSelectedCategory(null);
+    setSelectedRecord(null);
   };
 
   const handleSaveRecord = async (record) => {
@@ -63,7 +77,20 @@ const VaultPage = () => {
     } catch (error) {
       handleError(error.message);
     } finally {
-      setModal(false);
+      handleCloseModal();
+    }
+  };
+
+  const handleSaveCategory = async (category) => {
+    try {
+      const isNewCategory = !category.id;
+      const response = isNewCategory
+        ? await createCategory(category)
+        : await updateCategory(category);
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      handleCloseModal();
     }
   };
 
@@ -77,7 +104,33 @@ const VaultPage = () => {
     } catch (error) {
       handleError(error.message);
     } finally {
-      setModal(false);
+      handleCloseModal();
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    try {
+      await deleteCategory(categoryId);
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      handleCloseModal();
+    }
+  };
+
+  const handleSave = (type, data) => {
+    if (type === "record") {
+      handleSaveRecord(data);
+    } else if (type === "category") {
+      handleSaveCategory(data);
+    }
+  };
+
+  const handleDelete = (type, data) => {
+    if (type === "record") {
+      handleDeleteRecord(data.id);
+    } else if (type === "category") {
+      handleDeleteCategory(data.id);
     }
   };
 
@@ -107,8 +160,10 @@ const VaultPage = () => {
       <MyModal visible={modal} setVisible={setModal}>
         <RecordModal
           record={selectedRecord}
-          onSave={handleSaveRecord}
-          onDelete={() => handleDeleteRecord(selectedRecord.id)}
+          category={selectedCategory}
+          modalType={modalType}
+          onSave={handleSave}
+          onDelete={handleDelete}
           onClose={handleCloseModal}
         />
       </MyModal>

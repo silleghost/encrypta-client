@@ -99,3 +99,74 @@ export const deleteRecord = async (recordId) => {
     throw new Error("Ошибка при удалении записи");
   }
 };
+
+export const createCategory = async (category) => {
+  const authHeader = getAuthHeader();
+  const url = BASE_URL + CATEGORIES_URL;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+    body: JSON.stringify(omitId(category)),
+  });
+
+  const data = await response.json();
+
+  if (response.status === 201) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при создании категории");
+  }
+};
+
+export const updateCategory = async (category) => {
+  const authHeader = getAuthHeader();
+  const url = `${BASE_URL + CATEGORIES_URL}${category.id}/`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+    body: JSON.stringify(omitId(category)),
+  });
+
+  const data = await response.json();
+
+  if (response.status === 200) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при изменении категории");
+  }
+};
+
+export const deleteCategory = async (categoryId) => {
+  const authHeader = getAuthHeader();
+  const url = `${BASE_URL + CATEGORIES_URL}${categoryId}/`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+  });
+
+  const data = await response.json();
+
+  if (response.status === 204) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при удалении категории");
+  }
+};

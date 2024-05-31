@@ -1,10 +1,28 @@
 import React, { useRef } from "react";
 import "./RecordModal.css";
 import RecordForm from "../forms/RecordForm";
+import CategoryForm from "../forms/CategoryForm";
 
-const RecordModal = ({ record, categories, onClose, onSave, onDelete }) => {
-  const isNewRecord = !record || !record.id;
-  const title = isNewRecord ? "Новый элемент" : "Редактирование";
+const RecordModal = ({
+  record,
+  category,
+  categories,
+  modalType,
+  onClose,
+  onSave,
+  onDelete,
+}) => {
+  const isNewItem =
+    modalType === "record" ? !record || !record.id : !category || !category.id;
+  const title = isNewItem ? "Новый элемент" : "Редактирование";
+
+  const handleSave = (data) => {
+    onSave(modalType, data);
+  };
+
+  const handleDelete = () => {
+    onDelete(modalType, record || category);
+  };
 
   return (
     <div className="modal">
@@ -27,19 +45,24 @@ const RecordModal = ({ record, categories, onClose, onSave, onDelete }) => {
           </svg>
         </button>
       </div>
-      <RecordForm
-        initialRecord={record}
-        categories={categories}
-        onSave={onSave}
-      />
+      {modalType === "record" ? (
+        <RecordForm
+          initialRecord={record}
+          categories={categories}
+          onSave={handleSave}
+        />
+      ) : (
+        <CategoryForm initialCategory={category} onSave={handleSave} />
+      )}
+
       <div className="modal-footer">
         <button form="record-form" type="submit" className="save-button">
           <span>Сохранить</span>
         </button>
-        {!isNewRecord && (
-          <form className="delete-form">
-            <input type="hidden" value={record.id} name="id" />
-            <button type="submit" onClick={onDelete} className="delete-button">
+        {!isNewItem && (
+          <form className="delete-form" onSubmit={handleDelete}>
+            <input type="hidden" value={record.id || category.id} name="id" />
+            <button type="submit" className="delete-button">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
