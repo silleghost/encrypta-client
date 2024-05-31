@@ -3,9 +3,9 @@ import "./MySelect.css";
 
 const MySelect = forwardRef(({ options, ...props }, ref) => (
   <select ref={ref} className="my-select" {...props}>
-    {options.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
+    {options.map((option, index) => (
+      <option key={option.id || index} value={option.id}>
+        {option.name}
       </option>
     ))}
   </select>

@@ -29,10 +29,12 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
     onSave(record);
   };
 
-  const [selectedOption, setSelectedOption] = useState("");
-
   const handleChangeCategory = (e) => {
-    setSelectedOption(e.target.value);
+    const selectedCategoryId = e.target.value;
+    setRecord((prevRecord) => ({
+      ...prevRecord,
+      category: selectedCategoryId,
+    }));
   };
 
   return (
@@ -43,7 +45,6 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
       id="record-form"
     >
       <div className="form-content">
-        {/* <input type="hidden" value={record.id} name="id" /> */}
         <div className="form-row">
           <div className="form-field">
             <label>Название приложения</label>
@@ -59,7 +60,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
           <div className="form-field">
             <label>Категория</label>
             <MySelect
-              options={categories || []}
+              options={categories}
               value={record.category || ""}
               onChange={handleChangeCategory}
             />

@@ -100,6 +100,25 @@ export const deleteRecord = async (recordId) => {
   }
 };
 
+export const getCategories = async () => {
+  const authHeader = getAuthHeader();
+  let response = await fetch(BASE_URL + CATEGORIES_URL, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+  });
+  let data = await response.json();
+  if (response.status === 200) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при получении категорий");
+  }
+};
+
 export const createCategory = async (category) => {
   const authHeader = getAuthHeader();
   const url = BASE_URL + CATEGORIES_URL;

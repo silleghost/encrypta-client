@@ -6,7 +6,6 @@ import PasswordList from "../components/Vault/PasswordList/PasswordList";
 import Loading from "../components/UI/loading/Loading";
 import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
-import ErrorNotification from "../components/UI/notification/ErrorNotification";
 import NewElementButton from "../components/UI/select/OptionsSelect";
 import {
   createRecord,
@@ -16,9 +15,16 @@ import {
   updateCategory,
   deleteCategory,
 } from "../services/vaultService";
+import ErrorNotifications from "../components/Vault/ErrorNotifications";
 
 const VaultPage = () => {
-  const { setRecords, isLoading, error: vaultError } = useContext(VaultContext);
+  const {
+    setRecords,
+    isLoadingRecords,
+    error: vaultError,
+    setCategories,
+    categories,
+  } = useContext(VaultContext);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [modalType, setModalType] = useState(null);
@@ -87,6 +93,15 @@ const VaultPage = () => {
       const response = isNewCategory
         ? await createCategory(category)
         : await updateCategory(category);
+      setCategories((prevCategories) => {
+        if (isNewCategory) {
+          return [...prevCategories, response.data];
+        } else {
+          return prevCategories.map((c) =>
+            c.id === category.id ? response.data : c
+          );
+        }
+      });
     } catch (error) {
       handleError(error.message);
     } finally {
@@ -111,6 +126,9 @@ const VaultPage = () => {
   const handleDeleteCategory = async (categoryId) => {
     try {
       await deleteCategory(categoryId);
+      setCategories((prevCategories) =>
+        prevCategories.filter((category) => category.id !== categoryId)
+      );
     } catch (error) {
       handleError(error.message);
     } finally {
@@ -136,23 +154,13 @@ const VaultPage = () => {
 
   return (
     <div>
-      {errors.map((error, index) => (
-        <ErrorNotification
-          key={index}
-          error={error}
-          onClose={() => handleCloseError(index)}
-          autoCloseDelay={3000}
-        />
-      ))}
-      {vaultError && (
-        <ErrorNotification
-          error={vaultError}
-          onClose={handleCloseError}
-          autoCloseDelay={3000}
-        />
-      )}
+      <ErrorNotifications
+        errors={errors}
+        vaultError={vaultError}
+        handleCloseError={handleCloseError}
+      />
       <NavigationPanel />
-      {isLoading ? (
+      {isLoadingRecords ? (
         <Loading />
       ) : (
         <PasswordList handleOpenModal={handleOpenRecordModal} />
@@ -161,6 +169,7 @@ const VaultPage = () => {
         <RecordModal
           record={selectedRecord}
           category={selectedCategory}
+          categories={categories}
           modalType={modalType}
           onSave={handleSave}
           onDelete={handleDelete}

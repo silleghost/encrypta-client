@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "./RecordModal.css";
 import RecordForm from "../forms/RecordForm";
 import CategoryForm from "../forms/CategoryForm";
@@ -23,6 +23,10 @@ const RecordModal = ({
   const handleDelete = () => {
     onDelete(modalType, record || category);
   };
+
+  // useEffect(() => {
+  //   console.log(categories);
+  // }, []);
 
   return (
     <div className="modal">
