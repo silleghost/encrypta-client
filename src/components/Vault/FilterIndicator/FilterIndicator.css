@@ -1,0 +1,34 @@
+.filter-indicator {
+  background-color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.filter-indicator__item {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.filter-indicator__label {
+  font-size: 0.9rem;
+  color: #555;
+  margin-right: 0.25rem;
+}
+
+.filter-indicator__remove {
+  background-color: transparent;
+  border: none;
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.filter-indicator__remove:hover {
+  color: #333;
+}

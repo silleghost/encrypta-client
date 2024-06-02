@@ -5,18 +5,20 @@ import PasswordItem from "./PasswordItem/PasswordItem";
 import "./PasswordList.css";
 import Loading from "../../UI/loading/Loading";
 
-const PasswordList = ({ handleOpenModal }) => {
-  const { records, isLoadingRecords } = useContext(VaultContext);
-
+const PasswordList = ({ records, handleOpenModal }) => {
   return (
     <div className="password-list">
-      <ul className="password-list-items">
-        {records.map((record) => (
-          <li key={record.id} className="password-list-item">
-            <PasswordItem record={record} handleOpenModal={handleOpenModal} />
-          </li>
-        ))}
-      </ul>
+      {records.length === 0 ? (
+        <p>Ничего не найдено</p>
+      ) : (
+        <ul className="password-list-items">
+          {records.map((record) => (
+            <li key={record.id} className="password-list-item">
+              <PasswordItem record={record} handleOpenModal={handleOpenModal} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

@@ -11,6 +11,7 @@ const RecordForm = ({ initialRecord, categories, onSave }) => {
     username: "",
     password: "",
     url: "",
+    totp_secret: "",
   });
 
   useEffect(() => {

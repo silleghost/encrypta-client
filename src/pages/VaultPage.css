@@ -16,3 +16,11 @@
     align-items: center;
   }
 }
+
+.right-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+  width: 100%;
+}

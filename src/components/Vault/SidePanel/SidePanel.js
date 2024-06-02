@@ -46,14 +46,17 @@ const SidePanel = ({ onSearch, onFilterCategory }) => {
       <div className="category-list">
         <div className="category-cloud">
           {categories.map((category) => (
-            <span key={category.id} className="category-tag">
+            <span
+              key={category.id}
+              className="category-tag"
+              onClick={() => handleCategoryFilter(category)}
+            >
               {category.name}
             </span>
           ))}
         </div>
         <div className="additional-filters">
           <h3>Дополнительные фильтры</h3>
-          {/* Здесь вы можете добавить любые другие фильтры или компоненты */}
         </div>
       </div>
     </div>

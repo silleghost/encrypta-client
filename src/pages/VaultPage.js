@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./VaultPage.css";
 import NavigationPanel from "../components/Navbar/NavigationPanel";
 import { VaultContext } from "../context/VaultContext";
@@ -18,30 +18,48 @@ import {
 import ErrorNotifications from "../components/Vault/ErrorNotifications";
 import SidePanel from "../components/Vault/SidePanel/SidePanel";
 import EmptyVault from "../components/Vault/EmptyVault/EmptyVault";
+import FilterIndicator from "../components/Vault/FilterIndicator/FilterIndicator";
 
 const VaultPage = () => {
   const {
     records,
     setRecords,
+    categories,
+    setCategories,
     isLoadingRecords,
     error: vaultError,
-    setCategories,
-    categories,
   } = useContext(VaultContext);
+
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [modalType, setModalType] = useState(null);
   const [modal, setModal] = useState(false);
   const [errors, setErrors] = useState([]);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterByCategory, setFilterByCategory] = useState("");
+
+  const filteredRecords = useMemo(() => {
+    const filteredBySearch = records.filter(
+      (record) =>
+        record.app_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.url.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const filteredByCategory = filterByCategory
+      ? filteredBySearch.filter(
+          (record) => record.category === filterByCategory.id
+        )
+      : filteredBySearch;
+    return filteredByCategory;
+  }, [records, searchTerm, filterByCategory]);
+
   const handleSearch = (searchTerm) => {
-    // Здесь вы можете реализовать логику поиска по записям
-    console.log("Поиск:", searchTerm);
+    setSearchTerm(searchTerm);
   };
 
   const handleFilterCategory = (category) => {
-    // Здесь вы можете реализовать логику фильтрации по категориям
-    console.log("Фильтрация по категории:", category);
+    setFilterByCategory(category);
   };
 
   const handleError = (errorMessage) => {
@@ -177,7 +195,10 @@ const VaultPage = () => {
       {isLoadingRecords ? (
         <Loading />
       ) : records.length === 0 ? (
-        <EmptyVault />
+        <div>
+          <EmptyVault />
+          <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
+        </div>
       ) : (
         <div className="main-content">
           <SidePanel
@@ -185,7 +206,21 @@ const VaultPage = () => {
             onSearch={handleSearch}
             onFilterCategory={handleFilterCategory}
           />
-          <PasswordList handleOpenModal={handleOpenRecordModal} />
+          <div className="right-block">
+            {(searchTerm || filterByCategory) && (
+              <FilterIndicator
+                searchTerm={searchTerm}
+                filterByCategory={filterByCategory}
+                onClearSearch={() => handleSearch("")}
+                onClearCategory={() => handleFilterCategory(null)}
+              />
+            )}
+            <PasswordList
+              records={filteredRecords}
+              handleOpenModal={handleOpenRecordModal}
+            />
+            <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
+          </div>
         </div>
       )}
       <MyModal visible={modal} setVisible={setModal}>
@@ -199,7 +234,6 @@ const VaultPage = () => {
           onClose={handleCloseModal}
         />
       </MyModal>
-      <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
     </div>
   );
 };
