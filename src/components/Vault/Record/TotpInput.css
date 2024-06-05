@@ -1,0 +1,62 @@
+.totp-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  width: 50%;
+}
+
+.totp-input-container .my-input {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+}
+
+.totp-input-container button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.totp-input-container button:hover {
+  background-color: #e9ecef;
+}
+
+.totp-input-container button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.totp-input-container .timer-container {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #e9ecef;
+}
+
+.totp-input-container .timer-value {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  width: 15px;
+}
+
+.totp-input-container .timer-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  transform: rotate(-90deg);
+}
+
+.totp-input-container .timer-circle circle {
+  stroke: #007bff;
+  stroke-width: 3;
+  fill: transparent;
+}

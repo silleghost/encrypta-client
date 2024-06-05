@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./RecordModal.css";
 import RecordForm from "../forms/RecordForm";
 import CategoryForm from "../forms/CategoryForm";
+
+import TotpInput from "../components/Vault/Record/TotpInput";
 
 const RecordModal = ({
   record,
@@ -14,19 +16,33 @@ const RecordModal = ({
 }) => {
   const isNewItem =
     modalType === "record" ? !record || !record.id : !category || !category.id;
-  const title = isNewItem ? "Новый элемент" : "Редактирование";
+
+  const [editMode, setEditMode] = useState(isNewItem);
+  const [title, setTitle] = useState("");
+
+  const toggleEditMode = (e) => {
+    e.preventDefault();
+    setEditMode(!editMode);
+  };
+
+  useEffect(() => {
+    setEditMode(isNewItem);
+    if (isNewItem) {
+      setTitle("Новый элемент");
+    } else {
+      setTitle("Просмотр");
+    }
+  }, [isNewItem]);
 
   const handleSave = (data) => {
+    setEditMode(false);
     onSave(modalType, data);
   };
 
   const handleDelete = () => {
+    setEditMode(false);
     onDelete(modalType, record || category);
   };
-
-  // useEffect(() => {
-  //   console.log(categories);
-  // }, []);
 
   return (
     <div className="modal">
@@ -50,19 +66,28 @@ const RecordModal = ({
         </button>
       </div>
       {modalType === "record" ? (
-        <RecordForm
-          initialRecord={record}
-          categories={categories}
-          onSave={handleSave}
-        />
+        <>
+          <RecordForm
+            editMode={editMode}
+            initialRecord={record}
+            categories={categories}
+            onSave={handleSave}
+          />
+        </>
       ) : (
         <CategoryForm initialCategory={category} onSave={handleSave} />
       )}
-
       <div className="modal-footer">
-        <button form="record-form" type="submit" className="save-button">
-          <span>Сохранить</span>
-        </button>
+        {editMode ? (
+          <button form="record-form" type="submit" className="save-button">
+            <span>Сохранить</span>
+          </button>
+        ) : (
+          <button className="save-button" onClick={toggleEditMode}>
+            <span>Изменить</span>
+          </button>
+        )}
+
         {!isNewItem && (
           <form className="delete-form" onSubmit={handleDelete}>
             <input type="hidden" value={record.id || category.id} name="id" />

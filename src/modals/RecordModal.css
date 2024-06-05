@@ -108,3 +108,19 @@
   height: 1.5rem;
   color: #f87171;
 }
+
+.add-secret-key-text {
+  color: rgb(132, 132, 255);
+  cursor: pointer;
+}
+
+.add-secret-key-text:hover {
+  color: rgb(60, 60, 255);
+}
+
+.error {
+  color: #d63031;
+  font-style: italic;
+  font-weight: 400;
+  margin-top: 0.5rem;
+}
