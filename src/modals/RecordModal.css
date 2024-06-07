@@ -30,9 +30,13 @@
 
 .new-record-form {
   display: flex;
-  flex-direction: column;
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.modal-content {
+  display: flex;
+  gap: 1rem;
 }
 
 .form-content {
@@ -123,4 +127,18 @@
   font-style: italic;
   font-weight: 400;
   margin-top: 0.5rem;
+}
+
+.input-with-copy {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.input-with-copy .my-input {
+  flex: 1;
+  border: none;
+  border-radius: 0;
 }

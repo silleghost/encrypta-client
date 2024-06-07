@@ -114,7 +114,7 @@ const VaultPage = () => {
     } catch (error) {
       handleError(error.message);
     } finally {
-      handleCloseModal();
+      // handleCloseModal();
     }
   };
 

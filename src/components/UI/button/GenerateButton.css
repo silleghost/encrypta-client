@@ -1,0 +1,20 @@
+.gen-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.gen-btn:hover {
+  background-color: #e9ecef;
+}
+
+.gen-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

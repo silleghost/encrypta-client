@@ -32,7 +32,7 @@ const RecordModal = ({
     } else {
       setTitle("Просмотр");
     }
-  }, [isNewItem]);
+  }, [isNewItem, record]);
 
   const handleSave = (data) => {
     setEditMode(false);
@@ -79,9 +79,14 @@ const RecordModal = ({
       )}
       <div className="modal-footer">
         {editMode ? (
-          <button form="record-form" type="submit" className="save-button">
-            <span>Сохранить</span>
-          </button>
+          <>
+            <button form="record-form" type="submit" className="save-button">
+              <span>Сохранить</span>
+            </button>
+            <button className="save-button" onClick={toggleEditMode}>
+              <span>Отменить</span>
+            </button>
+          </>
         ) : (
           <button className="save-button" onClick={toggleEditMode}>
             <span>Изменить</span>
