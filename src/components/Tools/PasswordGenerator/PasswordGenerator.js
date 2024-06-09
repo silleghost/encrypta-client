@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./PasswordGenerator.css";
 import CopyButton from "../../UI/button/CopyButton";
 import MyInput from "../../UI/input/MyInput";
+import PasswordStrengthMeter from "../PasswordStrengthMeter/PasswordStrengthMeter";
 
 const PasswordGenerator = ({ embedded, onSelectPassword, onClose }) => {
   const [passwordLength, setPasswordLength] = useState(8);
@@ -130,6 +131,7 @@ const PasswordGenerator = ({ embedded, onSelectPassword, onClose }) => {
           <CopyButton value={generatedPassword} />
         </div>
       </div>
+      {generatedPassword && <PasswordStrengthMeter value={generatedPassword} />}
     </div>
   );
 };
