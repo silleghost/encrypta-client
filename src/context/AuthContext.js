@@ -8,12 +8,14 @@ import {
   userRegister,
   updateToken,
 } from "../services/authService";
+import { useCryptoKeys } from "../hooks/useKeys";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [authTokens, setAuthTokens] = useAuthTokens();
   const [user, setUser] = useUser();
+  const [masterKey, setMasterKey] = useCryptoKeys();
   const [loading, setLoading] = useState(true);
   const history = useNavigate();
 
@@ -35,12 +37,31 @@ export const AuthProvider = ({ children }) => {
     user,
     authTokens,
     userLogin: (username, password, totpCode) =>
-      userLogin(username, password, totpCode, setAuthTokens, setUser),
-    userRegister: (username, email, password) =>
-      userRegister(username, email, password, (username, password, totpCode) =>
-        userLogin(username, password, totpCode, setAuthTokens, setUser)
+      userLogin(
+        username,
+        password,
+        totpCode,
+        setAuthTokens,
+        setUser,
+        setMasterKey
       ),
-    userLogout: () => userLogout(setAuthTokens, setUser),
+    userRegister: (username, email, password) =>
+      userRegister(
+        username,
+        email,
+        password,
+        (username, password, totpCode) =>
+          userLogin(
+            username,
+            password,
+            totpCode,
+            setAuthTokens,
+            setUser,
+            setMasterKey
+          ),
+        setMasterKey
+      ),
+    userLogout: () => userLogout(setAuthTokens, setUser, setMasterKey),
   };
 
   return (

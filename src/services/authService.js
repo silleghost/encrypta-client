@@ -1,16 +1,27 @@
 import { jwtDecode } from "jwt-decode";
+import { deriveKey, derivePassword } from "../crypto";
 import {
   BASE_URL,
   LOGIN_URL,
   REGISTER_URL,
   REFRESH_TOKEN_URL,
 } from "../config";
+import { useCryptoKeys } from "../hooks/useKeys";
 
 //Функция регистрации
-export const userRegister = async (username, email, password, userLogin) => {
+export const userRegister = async (
+  username,
+  email,
+  password,
+  userLogin,
+  setCryptoKeys
+) => {
+  const masterKey = await deriveKey(password, username);
+  const masterPassword = await derivePassword(password, username);
+
   let requestBody = {
     username: username,
-    password: password,
+    password: masterPassword,
     email: email,
   };
 
@@ -25,6 +36,7 @@ export const userRegister = async (username, email, password, userLogin) => {
   let data = await response.json();
 
   if (response.status === 201) {
+    localStorage.setItem(`masterKey-${username}`, masterKey);
     userLogin(username, password, null);
   } else {
     throw new Error("Неудачная регистрация");
@@ -37,11 +49,14 @@ export const userLogin = async (
   password,
   totpCode,
   setAuthTokens,
-  setUser
+  setUser,
+  setKeys
 ) => {
+  const masterPassword = await derivePassword(password, username);
+
   let requestBody = {
     username: username,
-    password: password,
+    password: masterPassword,
     totp_code: totpCode,
   };
 
@@ -56,6 +71,8 @@ export const userLogin = async (
   let data = await response.json();
 
   if (response.status === 200) {
+    const masterKey = await deriveKey(password, username);
+    localStorage.setItem(`masterKey-${username}`, masterKey);
     setAuthTokens(data);
     setUser(data);
     return { status: response.status, data };
