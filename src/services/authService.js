@@ -25,8 +25,6 @@ export const userRegister = async (username, email, password, userLogin) => {
     email: email,
   };
 
-  console.log(requestBody);
-
   let response = await fetch(BASE_URL + REGISTER_URL, {
     method: "POST",
     headers: {

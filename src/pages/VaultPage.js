@@ -127,10 +127,10 @@ const VaultPage = () => {
         : await updateCategory(category);
       setCategories((prevCategories) => {
         if (isNewCategory) {
-          return [...prevCategories, response.data];
+          return [...prevCategories, category];
         } else {
           return prevCategories.map((c) =>
-            c.id === category.id ? response.data : c
+            c.id === category.id ? category : c
           );
         }
       });

@@ -49,7 +49,14 @@ async function encryptRecord(record) {
 
   // Шифрование каждого поля отдельно, кроме id
   for (const [key, value] of Object.entries(record)) {
-    if (key === "id" || key === "category") continue; // Пропускаем поле id
+    if (
+      key === "id" ||
+      key === "category" ||
+      key === "lastmodified_date" ||
+      key === "creation_date" ||
+      key === "favicon"
+    )
+      continue; // Пропускаем поле id
 
     const fieldValueString = JSON.stringify(value);
     const fieldValueArray = encoder.encode(fieldValueString);
@@ -62,6 +69,8 @@ async function encryptRecord(record) {
       encryptedField.encryptedData
     );
   }
+
+  encryptedRecord["id"] = record.id;
 
   if (record.category !== null) {
     encryptedRecord["category"] = record.category;
@@ -105,6 +114,8 @@ async function decryptRecord(encryptedRecord) {
     const decryptedValueString = decoder.decode(decryptedData);
     decryptedRecord[key] = JSON.parse(decryptedValueString);
   }
+
+  decryptedRecord["id"] = encryptedRecord.id;
 
   return decryptedRecord;
 }
@@ -182,6 +193,7 @@ export const updateRecord = async (record) => {
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
+    console.log(record);
     throw new Error("Ошибка при обновлени записи");
   }
 };
@@ -209,6 +221,61 @@ export const deleteRecord = async (recordId) => {
   }
 };
 
+async function encryptCategory(category) {
+  const encryptedCategory = {};
+  const encoder = new TextEncoder();
+
+  const masterKey = localStorage.getItem("masterKey");
+  const masterKeyArray = new Uint8Array(
+    atob(masterKey)
+      .split("")
+      .map((char) => char.charCodeAt(0))
+  );
+
+  const categoryNameString = JSON.stringify(category.name);
+  const categoryNameArray = encoder.encode(categoryNameString);
+  const encryptedName = await aesEncrypt(categoryNameArray, masterKeyArray);
+
+  encryptedCategory["name"] = encryptDataToString(
+    encryptedName.iv,
+    encryptedName.encryptedKey,
+    encryptedName.encryptedData
+  );
+
+  return encryptedCategory;
+}
+
+async function decryptCategory(encryptedCategory) {
+  const decryptedCategory = {};
+  const decoder = new TextDecoder("utf-8");
+
+  const masterKey = localStorage.getItem("masterKey");
+  const masterKeyArray = new Uint8Array(
+    atob(masterKey)
+      .split("")
+      .map((char) => char.charCodeAt(0))
+  );
+
+  const {
+    iv,
+    key: encryptedKey,
+    data: encryptedData,
+  } = decryptStringToData(encryptedCategory.name);
+
+  const decryptedData = await aesDecrypt(
+    iv,
+    encryptedKey,
+    encryptedData,
+    masterKeyArray
+  );
+
+  const decryptedNameString = decoder.decode(decryptedData);
+  decryptedCategory["name"] = JSON.parse(decryptedNameString);
+  decryptedCategory["id"] = encryptedCategory.id;
+
+  return decryptedCategory;
+}
+
 export const getCategories = async () => {
   const authHeader = getAuthHeader();
   let response = await fetch(BASE_URL + CATEGORIES_URL, {
@@ -220,7 +287,12 @@ export const getCategories = async () => {
   });
   let data = await response.json();
   if (response.status === 200) {
-    return { status: response.status, data };
+    const decryptedData = await Promise.all(
+      data.map(async (category) => {
+        return await decryptCategory(category);
+      })
+    );
+    return { status: response.status, data: decryptedData };
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
@@ -232,13 +304,15 @@ export const createCategory = async (category) => {
   const authHeader = getAuthHeader();
   const url = BASE_URL + CATEGORIES_URL;
 
+  const encryptedCategory = await encryptCategory(category);
+
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...authHeader,
     },
-    body: JSON.stringify(omitId(category)),
+    body: JSON.stringify(encryptedCategory),
   });
 
   const data = await response.json();
@@ -256,13 +330,15 @@ export const updateCategory = async (category) => {
   const authHeader = getAuthHeader();
   const url = `${BASE_URL + CATEGORIES_URL}${category.id}/`;
 
+  const encryptedCategory = await encryptCategory({ name: category.name });
+
   const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       ...authHeader,
     },
-    body: JSON.stringify(omitId(category)),
+    body: JSON.stringify(encryptedCategory),
   });
 
   const data = await response.json();
