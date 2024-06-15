@@ -10,7 +10,6 @@ export const useCryptoKeys = () => {
   const setKeys = async (password, salt) => {
     const key = await deriveKey(password, salt);
     localStorage.setItem("masterKey", JSON.stringify(key));
-    setMasterKey(key);
   };
 
   return [masterKey, setKeys];

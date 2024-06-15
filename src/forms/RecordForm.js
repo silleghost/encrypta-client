@@ -31,7 +31,6 @@ const RecordForm = ({ editMode, initialRecord, categories, onSave }) => {
 
   const tooglePasswordGenerator = (e) => {
     e.preventDefault();
-    console.log(showPasswordGenerator);
     setShowPasswordGenerator(!showPasswordGenerator);
   };
 

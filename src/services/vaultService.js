@@ -1,5 +1,10 @@
 import { BASE_URL, RECORDS_URL, CATEGORIES_URL } from "../config";
-
+import {
+  aesEncrypt,
+  aesDecrypt,
+  uint8ArrayToBase64,
+  base64ToUint8Array,
+} from "../crypto";
 const getAuthHeader = () => {
   const authTokens = JSON.parse(localStorage.getItem("authTokens"));
   return { Authorization: `JWT ${authTokens.access}` };
@@ -9,6 +14,100 @@ const omitId = (record) => {
   const { id, ...rest } = record;
   return rest;
 };
+
+function encryptDataToString(iv, key, data) {
+  return `${uint8ArrayToBase64(iv)}$${uint8ArrayToBase64(
+    key
+  )}$${uint8ArrayToBase64(data)}`;
+}
+
+function decryptStringToData(encryptedString) {
+  if (!encryptedString) {
+    throw new Error("Зашифрованная строка отсутствует или null");
+  }
+  const parts = encryptedString.split("$");
+  if (parts.length !== 3) {
+    throw new Error("Некорректный формат зашифрованной строки");
+  }
+  return {
+    iv: base64ToUint8Array(parts[0]),
+    key: base64ToUint8Array(parts[1]),
+    data: base64ToUint8Array(parts[2]),
+  };
+}
+
+async function encryptRecord(record) {
+  const encryptedRecord = {};
+  const encoder = new TextEncoder();
+
+  const masterKey = localStorage.getItem("masterKey");
+  const masterKeyArray = new Uint8Array(
+    atob(masterKey)
+      .split("")
+      .map((char) => char.charCodeAt(0))
+  );
+
+  // Шифрование каждого поля отдельно, кроме id
+  for (const [key, value] of Object.entries(record)) {
+    if (key === "id" || key === "category") continue; // Пропускаем поле id
+
+    const fieldValueString = JSON.stringify(value);
+    const fieldValueArray = encoder.encode(fieldValueString);
+    const encryptedField = await aesEncrypt(fieldValueArray, masterKeyArray);
+
+    // Формирование строки в формате {iv}${key}${data}
+    encryptedRecord[key] = encryptDataToString(
+      encryptedField.iv,
+      encryptedField.encryptedKey,
+      encryptedField.encryptedData
+    );
+  }
+
+  if (record.category !== null) {
+    encryptedRecord["category"] = record.category;
+  }
+
+  return encryptedRecord;
+}
+
+async function decryptRecord(encryptedRecord) {
+  const decryptedRecord = {};
+  const decoder = new TextDecoder("utf-8");
+  const masterKey = localStorage.getItem("masterKey");
+  const masterKeyArray = new Uint8Array(
+    atob(masterKey)
+      .split("")
+      .map((char) => char.charCodeAt(0))
+  );
+
+  for (const [key, value] of Object.entries(encryptedRecord)) {
+    if (
+      key === "id" ||
+      key === "category" ||
+      key === "favicon" ||
+      key === "creation_date" ||
+      key === "lastmodified_date"
+    ) {
+      decryptedRecord[key] = value; // Пропускаем шифрование для id и category
+      continue;
+    }
+    const {
+      iv,
+      key: encryptedKey,
+      data: encryptedData,
+    } = decryptStringToData(value);
+    const decryptedData = await aesDecrypt(
+      iv,
+      encryptedKey,
+      encryptedData,
+      masterKeyArray
+    );
+    const decryptedValueString = decoder.decode(decryptedData);
+    decryptedRecord[key] = JSON.parse(decryptedValueString);
+  }
+
+  return decryptedRecord;
+}
 
 export const getRecords = async () => {
   const authHeader = getAuthHeader();
@@ -21,7 +120,13 @@ export const getRecords = async () => {
   });
   let data = await response.json();
   if (response.status === 200) {
-    return { status: response.status, data };
+    // Расшифровка каждой записи в массиве
+    const decryptedData = await Promise.all(
+      data.map(async (record) => {
+        return await decryptRecord(record);
+      })
+    );
+    return { status: response.status, data: decryptedData };
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
@@ -33,19 +138,21 @@ export const createRecord = async (record) => {
   const authHeader = getAuthHeader();
   const url = BASE_URL + RECORDS_URL;
 
+  const encryptedRecord = await encryptRecord(record);
+
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...authHeader,
     },
-    body: JSON.stringify(omitId(record)),
+    body: JSON.stringify(encryptedRecord),
   });
 
-  const data = await response.json();
+  const responseData = await response.json();
 
   if (response.status === 201) {
-    return { status: response.status, data };
+    return { status: response.status, data: responseData };
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
@@ -57,13 +164,15 @@ export const updateRecord = async (record) => {
   const authHeader = getAuthHeader();
   const url = `${BASE_URL + RECORDS_URL}${record.id}/`;
 
+  const encryptedRecord = await encryptRecord(record);
+
   const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       ...authHeader,
     },
-    body: JSON.stringify(omitId(record)),
+    body: JSON.stringify(encryptedRecord),
   });
 
   const data = await response.json();
@@ -73,7 +182,7 @@ export const updateRecord = async (record) => {
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
-    throw new Error("Ошибка при обновлении записи");
+    throw new Error("Ошибка при обновлени записи");
   }
 };
 

@@ -1,15 +1,23 @@
 import argon2 from "argon2-browser";
 
-function stringToUint8Array(str) {
-  const uint8Array = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    uint8Array[i] = str.charCodeAt(i);
+export function base64ToUint8Array(base64) {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
   }
-  return uint8Array;
+  return bytes;
 }
 
-function uint8ArrayToBase64(uint8Array) {
-  return String.fromCharCode.apply(null, uint8Array);
+export function uint8ArrayToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
 }
 
 export async function deriveHash(passwordArray, saltArray) {
@@ -46,9 +54,11 @@ export async function deriveKey(password, salt) {
   const saltArray = stringToUint8Array(salt);
   let hash = await deriveHash(passwordArray, saltArray);
 
+  const hashBuffer = new Uint8Array(hash.hash);
+
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
-    hash.hash,
+    hashBuffer,
     { name: "AES-CBC" },
     true,
     ["encrypt", "decrypt"]
@@ -56,34 +66,79 @@ export async function deriveKey(password, salt) {
 
   const exportedKey = await crypto.subtle.exportKey("raw", cryptoKey);
 
-  console.log(uint8ArrayToBase64(exportedKey));
-
   return exportedKey;
 }
 
-export async function aesEncrypt(data) {
-  const iv = crypto.getRandomValues(new Uint8Array(16));
+export async function aesEncrypt(data, masterKey) {
+  // Генерация случайного ключа для шифрования данных
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-GCM", length: 256 },
+    true,
+    ["encrypt", "decrypt"]
+  );
 
-  //Получаем ключ из локал сторадж
-  const storedKey = localStorage.getItem("derivedKey");
-
-  const importedkey = await window.crypto.subtle.importKey(
+  // Импорт мастер-ключа как криптографического ключа
+  const cryptoMasterKey = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(importedkey.slice(0, 32)),
-    { name: "AES-CBC" },
+    masterKey,
+    { name: "AES-GCM", length: 256 },
     false,
     ["encrypt"]
   );
 
-  const encdata = await window.crypto.subtle.encrypt(
-    { name: "AES-CBC", iv },
+  // Шифрование данных с использованием случайного ключа
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encryptedData = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
     key,
     data
   );
 
-  const encdataString = Array.from(new Uint8Array(encdata))
-    .concat(Array.from(iv))
-    .join("$");
+  // Экспорт случайного ключа
+  const exportedKey = await crypto.subtle.exportKey("raw", key);
 
-  return new Uint8Array(encdataString);
+  // Шифрование экспортированного ключа с использованием мастер-ключа
+  const encryptedKey = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    cryptoMasterKey,
+    exportedKey
+  );
+
+  return {
+    encryptedData,
+    encryptedKey,
+    iv,
+  };
+}
+
+export async function aesDecrypt(iv, key, data, masterKey) {
+  const cryptoMasterKey = await crypto.subtle.importKey(
+    "raw",
+    masterKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+
+  const decryptedKey = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    cryptoMasterKey,
+    key
+  );
+
+  const importedKey = await crypto.subtle.importKey(
+    "raw",
+    decryptedKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+
+  const decryptedData = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    importedKey,
+    data
+  );
+
+  return decryptedData;
 }

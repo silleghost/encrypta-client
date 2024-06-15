@@ -6,7 +6,6 @@ import {
   REGISTER_URL,
   REFRESH_TOKEN_URL,
 } from "../config";
-import { useCryptoKeys } from "../hooks/useKeys";
 
 //Функция регистрации
 export const userRegister = async (
@@ -36,7 +35,10 @@ export const userRegister = async (
   let data = await response.json();
 
   if (response.status === 201) {
-    localStorage.setItem(`masterKey-${username}`, masterKey);
+    let keyStr = btoa(
+      String.fromCharCode.apply(null, new Uint8Array(masterKey))
+    );
+    localStorage.setItem("masterKey", keyStr);
     userLogin(username, password, null);
   } else {
     throw new Error("Неудачная регистрация");
@@ -72,7 +74,10 @@ export const userLogin = async (
 
   if (response.status === 200) {
     const masterKey = await deriveKey(password, username);
-    localStorage.setItem(`masterKey-${username}`, masterKey);
+    let keyStr = btoa(
+      String.fromCharCode.apply(null, new Uint8Array(masterKey))
+    );
+    localStorage.setItem("masterKey", keyStr);
     setAuthTokens(data);
     setUser(data);
     return { status: response.status, data };

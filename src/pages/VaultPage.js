@@ -102,13 +102,14 @@ const VaultPage = () => {
       const response = isNewRecord
         ? await createRecord(record)
         : await updateRecord(record);
+
       setRecords((prevRecords) => {
         if (isNewRecord) {
-          return [...prevRecords, response.data];
+          // Добавляем незашифрованную запись в список
+          return [...prevRecords, record];
         } else {
-          return prevRecords.map((r) =>
-            r.id === record.id ? response.data : r
-          );
+          // Обновляем запись в списке, используя незашифрованную запись
+          return prevRecords.map((r) => (r.id === record.id ? record : r));
         }
       });
     } catch (error) {
