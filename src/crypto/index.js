@@ -20,6 +20,24 @@ export function uint8ArrayToBase64(buffer) {
   return window.btoa(binary);
 }
 
+export async function generateSalt(value) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(value);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const slicedHashBuffer = hashBuffer.slice(0, 16);
+  const hashArray = new Uint8Array(slicedHashBuffer);
+
+  // Преобразование Uint8Array в строку Base64
+  const hashString = uint8ArrayToBase64(hashArray);
+
+  return { hashString, hashArray };
+}
+
+export function stringToUint8Array(value) {
+  const encoder = new TextEncoder();
+  return encoder.encode(value);
+}
+
 export async function deriveHash(passwordArray, saltArray) {
   const hash = await argon2.hash({
     pass: passwordArray,
@@ -33,9 +51,7 @@ export async function deriveHash(passwordArray, saltArray) {
   return hash;
 }
 
-export async function derivePassword(password, salt) {
-  const passwordArray = stringToUint8Array(password);
-  const saltArray = stringToUint8Array(salt);
+export async function derivePassword(passwordArray, saltArray) {
   const hash = await deriveHash(passwordArray, saltArray);
   const passwordHash = await argon2.hash({
     pass: hash.hash,
@@ -49,9 +65,7 @@ export async function derivePassword(password, salt) {
   return passwordHash.encoded;
 }
 
-export async function deriveKey(password, salt) {
-  const passwordArray = stringToUint8Array(password);
-  const saltArray = stringToUint8Array(salt);
+export async function deriveKey(passwordArray, saltArray) {
   let hash = await deriveHash(passwordArray, saltArray);
 
   const hashBuffer = new Uint8Array(hash.hash);
@@ -59,7 +73,7 @@ export async function deriveKey(password, salt) {
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     hashBuffer,
-    { name: "AES-CBC" },
+    { name: "AES-GCM" },
     true,
     ["encrypt", "decrypt"]
   );

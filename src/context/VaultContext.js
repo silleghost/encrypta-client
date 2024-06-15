@@ -14,10 +14,9 @@ export const VaultProvider = ({ children }) => {
   const { userLogout } = useContext(AuthContext);
 
   const fetchRecords = async () => {
-    const response = await getRecords();
     try {
       setIsLoadingRecords(true);
-      // const response = await getRecords();
+      const response = await getRecords();
       setRecords(response.data);
     } catch (error) {
       if (error.message === "Неавторизован") {

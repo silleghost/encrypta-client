@@ -1,5 +1,10 @@
 import { jwtDecode } from "jwt-decode";
-import { deriveKey, derivePassword } from "../crypto";
+import {
+  deriveKey,
+  derivePassword,
+  generateSalt,
+  stringToUint8Array,
+} from "../crypto";
 import {
   BASE_URL,
   LOGIN_URL,
@@ -8,21 +13,19 @@ import {
 } from "../config";
 
 //Функция регистрации
-export const userRegister = async (
-  username,
-  email,
-  password,
-  userLogin,
-  setCryptoKeys
-) => {
-  const masterKey = await deriveKey(password, username);
-  const masterPassword = await derivePassword(password, username);
+export const userRegister = async (username, email, password, userLogin) => {
+  const { hashString: hashedUsername, hashArray: saltArray } =
+    await generateSalt(username);
+  const passwordArray = stringToUint8Array(password);
+  const masterPassword = await derivePassword(passwordArray, saltArray);
 
   let requestBody = {
-    username: username,
+    username: hashedUsername,
     password: masterPassword,
     email: email,
   };
+
+  console.log(requestBody);
 
   let response = await fetch(BASE_URL + REGISTER_URL, {
     method: "POST",
@@ -35,6 +38,7 @@ export const userRegister = async (
   let data = await response.json();
 
   if (response.status === 201) {
+    const masterKey = await deriveKey(passwordArray, saltArray);
     let keyStr = btoa(
       String.fromCharCode.apply(null, new Uint8Array(masterKey))
     );
@@ -51,13 +55,15 @@ export const userLogin = async (
   password,
   totpCode,
   setAuthTokens,
-  setUser,
-  setKeys
+  setUser
 ) => {
-  const masterPassword = await derivePassword(password, username);
+  const { hashString: hashedUsername, hashArray: saltArray } =
+    await generateSalt(username);
+  const passwordArray = stringToUint8Array(password);
+  const masterPassword = await derivePassword(passwordArray, saltArray);
 
   let requestBody = {
-    username: username,
+    username: hashedUsername,
     password: masterPassword,
     totp_code: totpCode,
   };
@@ -73,7 +79,7 @@ export const userLogin = async (
   let data = await response.json();
 
   if (response.status === 200) {
-    const masterKey = await deriveKey(password, username);
+    const masterKey = await deriveKey(passwordArray, saltArray);
     let keyStr = btoa(
       String.fromCharCode.apply(null, new Uint8Array(masterKey))
     );
@@ -125,7 +131,7 @@ export const updateToken = async (
 };
 
 //Функция выхода пользователя
-export const userLogout = (setAuthTokens, setUser, history) => {
+export const userLogout = (setAuthTokens, setUser) => {
   setAuthTokens(null);
   setUser(null);
 };
