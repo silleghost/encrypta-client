@@ -1,0 +1,59 @@
+/* Основные стили для компонента анализа безопасности */
+.security-analysis-container {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.security-analysis-title {
+  color: #333;
+  border-bottom: 2px solid #666;
+  padding-bottom: 10px;
+}
+
+.security-analysis-subtitle {
+  color: #555;
+  margin-top: 20px;
+}
+
+.security-analysis-section {
+  margin-top: 10px;
+}
+
+/* Стили для отображения силы паролей */
+.password-strength-item {
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* Стили для отображения повторяющихся паролей */
+.repeated-passwords-item {
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: #ffe0e0;
+  border-radius: 4px;
+  color: #d00;
+}
+
+/* Стили для значка совета */
+.size-6 {
+  width: 24px; /* Установка ширины значка */
+  height: 24px; /* Устано��ка высоты значка */
+  margin-left: 10px; /* Отступ слева для разделения текста и значка */
+  cursor: help; /* Курсор в виде вопросительного знака при наведении */
+}
+
+/* Стили для отображения записей без двухфакторной аутентификации */
+.totp-missing-item {
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: #ffcccc; /* светло-красный фон для выделения */
+  border-radius: 4px;
+  color: #b00; /* темно-красный текст для контраста */
+}

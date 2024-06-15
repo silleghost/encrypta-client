@@ -105,11 +105,14 @@ const VaultPage = () => {
 
       setRecords((prevRecords) => {
         if (isNewRecord) {
-          // Добавляем незашифрованную запись в список
+          record.id = response.data.id;
+          // Добавляем новую запись с id из ответа сервера
           return [...prevRecords, record];
         } else {
-          // Обновляем запись в списке, используя незашифрованную запись
-          return prevRecords.map((r) => (r.id === record.id ? record : r));
+          // Обновляем запись в списке, используя данные из ответа сервера
+          return prevRecords.map((r) =>
+            r.id === record.id ? { ...record, ...response } : r
+          );
         }
       });
     } catch (error) {
@@ -171,6 +174,7 @@ const VaultPage = () => {
   const handleSave = (type, data) => {
     if (type === "record") {
       handleSaveRecord(data);
+      console.log(records);
     } else if (type === "category") {
       handleSaveCategory(data);
     }
