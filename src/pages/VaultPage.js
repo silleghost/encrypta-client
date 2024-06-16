@@ -6,7 +6,7 @@ import PasswordList from "../components/Vault/PasswordList/PasswordList";
 import Loading from "../components/UI/loading/Loading";
 import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
-import NewElementButton from "../components/UI/select/OptionsSelect";
+import OptionsSelect from "../components/UI/select/OptionsSelect";
 import {
   createRecord,
   updateRecord,
@@ -14,21 +14,33 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  createCard,
+  updateCard,
+  deleteCard,
 } from "../services/vaultService";
 import ErrorNotifications from "../components/Vault/ErrorNotifications";
 import SidePanel from "../components/Vault/SidePanel/SidePanel";
 import EmptyVault from "../components/Vault/EmptyVault/EmptyVault";
 import FilterIndicator from "../components/Vault/FilterIndicator/FilterIndicator";
+import CardList from "../components/Vault/CardList/CardList"; // New import for CardList component
 
 const VaultPage = () => {
   const {
     records,
     setRecords,
+    cards,
+    setCards,
     categories,
     setCategories,
     isLoadingRecords,
     error: vaultError,
   } = useContext(VaultContext);
+
+  const options = [
+    { label: "Запись", modalName: "modal-new-record" },
+    { label: "Категорию", modalName: "modal-new-category" },
+    { label: "Банковская карта", modalName: "modal-new-card" },
+  ];
 
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -38,6 +50,7 @@ const VaultPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
+  const [filterType, setFilterType] = useState("all"); // 'record', 'card', 'all'
 
   const filteredRecords = useMemo(() => {
     const filteredBySearch = records.filter(
@@ -54,12 +67,25 @@ const VaultPage = () => {
     return filteredByCategory;
   }, [records, searchTerm, filterByCategory]);
 
+  const filteredCards = useMemo(() => {
+    const filteredBySearch = cards.filter(
+      (card) =>
+        card.card_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.card_number.slice(-4).includes(searchTerm) // предполагаем, что пользователь может искать по последним 4 цифрам номера карты
+    );
+    return filteredBySearch;
+  }, [cards, searchTerm]);
+
   const handleSearch = (searchTerm) => {
     setSearchTerm(searchTerm);
   };
 
   const handleFilterCategory = (category) => {
     setFilterByCategory(category);
+  };
+
+  const handleFilterType = (type) => {
+    setFilterType(type);
   };
 
   const handleError = (errorMessage) => {
@@ -80,12 +106,22 @@ const VaultPage = () => {
       setModalType("category");
       setSelectedCategory(null);
       setModal(true);
+    } else if (modalName === "modal-new-card") {
+      // Новый случай
+      setModalType("card");
+      setSelectedRecord(null);
+      setModal(true);
     }
   };
 
-  const handleOpenRecordModal = (record = null) => {
-    setModalType("record");
-    setSelectedRecord(record);
+  const handleOpenModal = (item, type) => {
+    if (type === "record") {
+      setModalType("record");
+      setSelectedRecord(item);
+    } else if (type === "card") {
+      setModalType("card");
+      setSelectedRecord(item); // возможно, вам нужно будет использовать другую функцию для установки выбранной карты
+    }
     setModal(true);
   };
 
@@ -144,6 +180,32 @@ const VaultPage = () => {
     }
   };
 
+  const handleSaveCard = async (card) => {
+    try {
+      const isNewCard = !card.id;
+      const response = isNewCard
+        ? await createCard(card)
+        : await updateCard(card);
+
+      setCards((prevCards) => {
+        if (isNewCard) {
+          card.id = response.data.id;
+          // Добавляем новую запись с id из ответа сервера
+          return [...prevCards, card];
+        } else {
+          // Обновляем запись в списке, используя даннные из ответа сервера
+          return prevCards.map((c) =>
+            c.id === card.id ? { ...card, ...response } : c
+          );
+        }
+      });
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      // handleCloseModal();
+    }
+  };
+
   const handleDeleteRecord = async (recordId) => {
     try {
       await deleteRecord(recordId);
@@ -171,12 +233,25 @@ const VaultPage = () => {
     }
   };
 
+  const handleDeleteCard = async (cardId) => {
+    try {
+      await deleteCard(cardId);
+
+      setCards((prevCards) => prevCards.filter((card) => card.id !== cardId));
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      handleCloseModal();
+    }
+  };
+
   const handleSave = (type, data) => {
     if (type === "record") {
       handleSaveRecord(data);
-      console.log(records);
     } else if (type === "category") {
       handleSaveCategory(data);
+    } else if (type === "card") {
+      handleSaveCard(data);
     }
   };
 
@@ -185,8 +260,41 @@ const VaultPage = () => {
       handleDeleteRecord(data.id);
     } else if (type === "category") {
       handleDeleteCategory(data.id);
+    } else if (type === "card") {
+      handleDeleteCard(data.id);
     }
   };
+
+  const displayedItems = useMemo(() => {
+    if (filterType === "record") {
+      return (
+        <PasswordList
+          records={filteredRecords}
+          handleOpenModal={(record) => handleOpenModal(record, "record")}
+        />
+      );
+    } else if (filterType === "card") {
+      return (
+        <CardList
+          cards={filteredCards}
+          handleOpenModal={(card) => handleOpenModal(card, "card")}
+        />
+      );
+    } else {
+      return (
+        <>
+          <PasswordList
+            records={filteredRecords}
+            handleOpenModal={(record) => handleOpenModal(record, "record")}
+          />
+          <CardList
+            cards={filteredCards}
+            handleOpenModal={(card) => handleOpenModal(card, "card")}
+          />
+        </>
+      );
+    }
+  }, [filterType, filteredRecords, filteredCards]);
 
   return (
     <div>
@@ -202,7 +310,10 @@ const VaultPage = () => {
       ) : records.length === 0 ? (
         <div>
           <EmptyVault />
-          <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
+          <OptionsSelect
+            options={options}
+            handleOptionSelected={handleOpenNewRecordModal}
+          />
         </div>
       ) : (
         <div className="main-content">
@@ -210,21 +321,24 @@ const VaultPage = () => {
             categories={categories}
             onSearch={handleSearch}
             onFilterCategory={handleFilterCategory}
+            onFilterType={handleFilterType}
           />
           <div className="right-block">
-            {(searchTerm || filterByCategory) && (
+            {(searchTerm || filterByCategory || filterType !== "all") && (
               <FilterIndicator
                 searchTerm={searchTerm}
+                filterType={filterType}
                 filterByCategory={filterByCategory}
                 onClearSearch={() => handleSearch("")}
                 onClearCategory={() => handleFilterCategory(null)}
+                onClearFilterType={() => handleFilterType("all")}
               />
             )}
-            <PasswordList
-              records={filteredRecords}
-              handleOpenModal={handleOpenRecordModal}
+            {displayedItems}
+            <OptionsSelect
+              options={options}
+              handleOptionSelected={handleOpenNewRecordModal}
             />
-            <NewElementButton handleOptionSelected={handleOpenNewRecordModal} />
           </div>
         </div>
       )}

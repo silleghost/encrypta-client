@@ -1,17 +1,12 @@
 import React, { useState } from "react";
 import "./OptionsSelect.css";
 
-const OptionsSelect = ({ handleOptionSelected }) => {
+const OptionsSelect = ({ options, handleOptionSelected }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
-
-  const options = [
-    { label: "Запись", modalName: "modal-new-record" },
-    { label: "Категорию", modalName: "modal-new-category" },
-  ];
 
   return (
     <div className="modal-button-container">

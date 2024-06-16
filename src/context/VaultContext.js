@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { getRecords, getCategories } from "../services/vaultService";
+import { getRecords, getCategories, getCards } from "../services/vaultService";
 
 export const VaultContext = createContext();
 
 export const VaultProvider = ({ children }) => {
   const [records, setRecords] = useState([]);
+  const [cards, setCards] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [error, setError] = useState(null);
 
   const { userLogout } = useContext(AuthContext);
@@ -45,9 +47,26 @@ export const VaultProvider = ({ children }) => {
     }
   };
 
+  const fetchCards = async () => {
+    try {
+      setIsLoadingCards(true);
+      const response = await getCards();
+      setCards(response.data);
+    } catch (error) {
+      if (error.message === "Неавторизован") {
+        userLogout();
+      } else {
+        setError(error.message);
+      }
+    } finally {
+      setIsLoadingCards(false);
+    }
+  };
+
   useEffect(() => {
     fetchRecords();
     fetchCategories();
+    fetchCards();
   }, []);
 
   const contextData = {
@@ -57,6 +76,9 @@ export const VaultProvider = ({ children }) => {
     setCategories,
     isLoadingRecords,
     isLoadingCategories,
+    isLoadingCards,
+    cards,
+    setCards,
     error,
   };
 

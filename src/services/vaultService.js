@@ -1,4 +1,4 @@
-import { BASE_URL, RECORDS_URL, CATEGORIES_URL } from "../config";
+import { BASE_URL, RECORDS_URL, CATEGORIES_URL, CARDS_URL } from "../config";
 import {
   aesEncrypt,
   aesDecrypt,
@@ -193,7 +193,6 @@ export const updateRecord = async (record) => {
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
-    console.log(record);
     throw new Error("Ошибка при обновлени записи");
   }
 };
@@ -372,5 +371,104 @@ export const deleteCategory = async (categoryId) => {
     throw new Error("Неавторизован");
   } else {
     throw new Error("Ошибка при удалении категории");
+  }
+};
+
+export const getCards = async () => {
+  const authHeader = getAuthHeader();
+  let response = await fetch(BASE_URL + CARDS_URL, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+  });
+  let data = await response.json();
+  if (response.status === 200) {
+    const decryptedData = await Promise.all(
+      data.map(async (card) => {
+        return await decryptRecord(card);
+      })
+    );
+    return { status: response.status, data: decryptedData };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при получении карт");
+  }
+};
+
+export const createCard = async (card) => {
+  const authHeader = getAuthHeader();
+  const url = BASE_URL + CARDS_URL;
+
+  const encryptedCard = await encryptRecord(card);
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+    body: JSON.stringify(encryptedCard),
+  });
+
+  const data = await response.json();
+
+  if (response.status === 201) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при создании карты");
+  }
+};
+
+export const updateCard = async (card) => {
+  const authHeader = getAuthHeader();
+  const url = `${BASE_URL + CARDS_URL}${card.id}/`;
+
+  const encryptedCard = await encryptRecord(card);
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+    body: JSON.stringify(encryptedCard),
+  });
+
+  const data = await response.json();
+
+  if (response.status === 200) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при изменении карты");
+  }
+};
+
+export const deleteCard = async (cardId) => {
+  const authHeader = getAuthHeader();
+  const url = `${BASE_URL + CARDS_URL}${cardId}/`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader,
+    },
+  });
+
+  const data = await response.json();
+
+  if (response.status === 204) {
+    return { status: response.status, data };
+  } else if (response.status === 401) {
+    throw new Error("Неавторизован");
+  } else {
+    throw new Error("Ошибка при удалении карты");
   }
 };

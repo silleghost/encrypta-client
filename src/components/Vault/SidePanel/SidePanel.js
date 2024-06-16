@@ -2,7 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { VaultContext } from "../../../context/VaultContext";
 import "./SidePanel.css";
 
-const SidePanel = ({ onSearch, onFilterCategory }) => {
+const SidePanel = ({
+  onSearch,
+  onFilterCategory,
+  onFilterType,
+  activeFilterType,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [debounceTimer, setDebounceTimer] = useState(null);
@@ -57,6 +62,22 @@ const SidePanel = ({ onSearch, onFilterCategory }) => {
         </div>
         <div className="additional-filters">
           <h3>Дополнительные фильтры</h3>
+          <button
+            className={`filter-button ${
+              activeFilterType === "record" ? "active" : ""
+            }`}
+            onClick={() => onFilterType("record")}
+          >
+            Запись
+          </button>
+          <button
+            className={`filter-button ${
+              activeFilterType === "card" ? "active" : ""
+            }`}
+            onClick={() => onFilterType("card")}
+          >
+            Карта
+          </button>
         </div>
       </div>
     </div>

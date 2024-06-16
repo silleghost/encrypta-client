@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./RecordModal.css";
 import RecordForm from "../forms/RecordForm";
 import CategoryForm from "../forms/CategoryForm";
-
-import TotpInput from "../components/Vault/Record/TotpInput";
+import CardForm from "../forms/CardForm";
 
 const RecordModal = ({
   record,
@@ -15,7 +14,11 @@ const RecordModal = ({
   onDelete,
 }) => {
   const isNewItem =
-    modalType === "record" ? !record || !record.id : !category || !category.id;
+    modalType === "record"
+      ? !record || !record.id
+      : modalType === "category"
+      ? !category || !category.id
+      : !record || !record.id;
 
   const [editMode, setEditMode] = useState(isNewItem);
   const [title, setTitle] = useState("");
@@ -28,11 +31,23 @@ const RecordModal = ({
   useEffect(() => {
     setEditMode(isNewItem);
     if (isNewItem) {
-      setTitle("Новый элемент");
+      setTitle(
+        modalType === "record"
+          ? "Новая запись"
+          : modalType === "category"
+          ? "Новая категория"
+          : "Новая карта"
+      );
     } else {
-      setTitle("Просмотр");
+      setTitle(
+        modalType === "record"
+          ? "Просмотр записи"
+          : modalType === "category"
+          ? "Просмотр категории"
+          : "Просмотр карты"
+      );
     }
-  }, [isNewItem, record]);
+  }, [isNewItem, record, category, modalType]);
 
   const handleSave = (data) => {
     setEditMode(false);
@@ -66,17 +81,21 @@ const RecordModal = ({
         </button>
       </div>
       {modalType === "record" ? (
-        <>
-          <RecordForm
-            editMode={editMode}
-            initialRecord={record}
-            categories={categories}
-            onSave={handleSave}
-          />
-        </>
-      ) : (
+        <RecordForm
+          editMode={editMode}
+          initialRecord={record}
+          categories={categories}
+          onSave={handleSave}
+        />
+      ) : modalType === "category" ? (
         <CategoryForm initialCategory={category} onSave={handleSave} />
-      )}
+      ) : modalType === "card" ? (
+        <CardForm
+          editMode={editMode}
+          initialCard={record}
+          onSave={handleSave}
+        />
+      ) : null}
       <div className="modal-footer">
         {editMode ? (
           <>
