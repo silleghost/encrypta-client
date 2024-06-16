@@ -5,3 +5,4 @@ export const REFRESH_TOKEN_URL = "/user/api/token/refresh/";
 export const RECORDS_URL = "/vault/api/records/";
 export const CATEGORIES_URL = "/vault/api/categories/";
 export const CARDS_URL = "/vault/api/cards/";
+export const AUDIT_URL = "/audit/api/events/";

@@ -6,6 +6,7 @@ import VaultPage from "../pages/VaultPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import UserLogout from "../pages/UserLogout";
 import ToolsPage from "../pages/ToolsPage";
+import NotesPage from "../pages/NotesPage";
 
 export const publicRoutes = [
   { path: "/login", element: <LoginPage />, exact: true },
@@ -17,4 +18,5 @@ export const privateRoutes = [
   { path: "/vault", element: <VaultPage />, exact: true },
   { path: "/tools", element: <ToolsPage />, exact: true },
   { path: "/logout", element: <UserLogout />, exact: true },
+  { path: "/notes", element: <NotesPage />, exact: true },
 ];

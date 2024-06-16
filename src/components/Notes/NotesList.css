@@ -1,0 +1,14 @@
+.notes-list {
+  list-style: none;
+  padding: 0;
+}
+
+.notes-list li {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.notes-list li:hover {
+  background-color: #f3f3f3;
+}

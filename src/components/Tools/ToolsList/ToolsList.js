@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PasswordGenerator from "../PasswordGenerator/PasswordGenerator";
 import SecurityAnalysis from "../SecurityAnalysis/SecurityAnalysis";
+import AuditLog from "../AuditLog/AuditLog"; // Added import for AuditLogViewer
 import "./ToolsList.css";
 
 const ToolsList = () => {
@@ -16,6 +17,8 @@ const ToolsList = () => {
         return <PasswordGenerator embedded={false} />;
       case "securityAnalysis":
         return <SecurityAnalysis />;
+      case "auditLog": // Added new case for AuditLogViewer
+        return <AuditLog />;
       default:
         return null;
     }
@@ -85,6 +88,12 @@ const ToolsList = () => {
                 d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5"
               />
             </svg>
+          </li>
+          <li
+            className="tool-item"
+            onClick={() => handleToolClick("auditLog")} // Added list item for AuditLogViewer
+          >
+            <span className="tool-name">Журнал аудита</span>
           </li>
         </ul>
       )}

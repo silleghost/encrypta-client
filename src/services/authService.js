@@ -1,4 +1,3 @@
-import { jwtDecode } from "jwt-decode";
 import {
   deriveKey,
   derivePassword,
@@ -11,6 +10,7 @@ import {
   REGISTER_URL,
   REFRESH_TOKEN_URL,
 } from "../config";
+import { logAuditEvent } from "./auditService"; // Предполагается, что функция логирования находится в auditService.js
 
 //Функция регистрации
 export const userRegister = async (username, email, password, userLogin) => {
@@ -42,6 +42,11 @@ export const userRegister = async (username, email, password, userLogin) => {
     );
     localStorage.setItem("masterKey", keyStr);
     userLogin(username, password, null);
+    logAuditEvent({
+      user: username,
+      action: "register",
+      details: "Успешная регистрация",
+    });
   } else {
     throw new Error("Неудачная регистрация");
   }
@@ -84,6 +89,11 @@ export const userLogin = async (
     localStorage.setItem("masterKey", keyStr);
     setAuthTokens(data);
     setUser(data);
+    logAuditEvent({
+      user: username,
+      action: "login",
+      details: "Успешный вход",
+    });
     return { status: response.status, data };
   } else if (response.status === 401 && data.message === "Введите TOTP код") {
     throw new Error("Введите TOTP код");

@@ -5,23 +5,20 @@ import {
   uint8ArrayToBase64,
   base64ToUint8Array,
 } from "../crypto";
+import { logAuditEvent } from "./auditService";
+
 const getAuthHeader = () => {
   const authTokens = JSON.parse(localStorage.getItem("authTokens"));
   return { Authorization: `JWT ${authTokens.access}` };
 };
 
-const omitId = (record) => {
-  const { id, ...rest } = record;
-  return rest;
-};
-
-function encryptDataToString(iv, key, data) {
+export function encryptDataToString(iv, key, data) {
   return `${uint8ArrayToBase64(iv)}$${uint8ArrayToBase64(
     key
   )}$${uint8ArrayToBase64(data)}`;
 }
 
-function decryptStringToData(encryptedString) {
+export function decryptStringToData(encryptedString) {
   if (!encryptedString) {
     throw new Error("Зашифрованная строка отсутствует или null");
   }
@@ -47,7 +44,7 @@ async function encryptRecord(record) {
       .map((char) => char.charCodeAt(0))
   );
 
-  // Шифрование каждого поля отдельно, кроме id
+  // Шифрование каждого поля отдел��но, кроме id
   for (const [key, value] of Object.entries(record)) {
     if (
       key === "id" ||
@@ -162,6 +159,12 @@ export const createRecord = async (record) => {
 
   const responseData = await response.json();
 
+  logAuditEvent({
+    action: "createRecord",
+    status: response.status,
+    details: record.app_name,
+  });
+
   if (response.status === 201) {
     return { status: response.status, data: responseData };
   } else if (response.status === 401) {
@@ -176,7 +179,6 @@ export const updateRecord = async (record) => {
   const url = `${BASE_URL + RECORDS_URL}${record.id}/`;
 
   const encryptedRecord = await encryptRecord(record);
-
   const response = await fetch(url, {
     method: "PUT",
     headers: {
@@ -188,12 +190,18 @@ export const updateRecord = async (record) => {
 
   const data = await response.json();
 
+  logAuditEvent({
+    action: "updateRecord",
+    status: response.status,
+    details: record.app_name,
+  });
+
   if (response.status === 200) {
     return { status: response.status, data };
   } else if (response.status === 401) {
     throw new Error("Неавторизован");
   } else {
-    throw new Error("Ошибка при обновлени записи");
+    throw new Error("Ошибка при обновлении записи");
   }
 };
 
@@ -210,6 +218,12 @@ export const deleteRecord = async (recordId) => {
   });
 
   const data = await response.json();
+
+  logAuditEvent({
+    action: "deleteRecord",
+    status: response.status,
+    details: recordId,
+  });
 
   if (response.status === 204) {
     return { status: response.status, data };
@@ -316,6 +330,12 @@ export const createCategory = async (category) => {
 
   const data = await response.json();
 
+  logAuditEvent({
+    action: "createCategory",
+    status: response.status,
+    details: category.name,
+  });
+
   if (response.status === 201) {
     return { status: response.status, data };
   } else if (response.status === 401) {
@@ -342,6 +362,12 @@ export const updateCategory = async (category) => {
 
   const data = await response.json();
 
+  logAuditEvent({
+    action: "updateCategory",
+    status: response.status,
+    details: category.name,
+  });
+
   if (response.status === 200) {
     return { status: response.status, data };
   } else if (response.status === 401) {
@@ -364,6 +390,12 @@ export const deleteCategory = async (categoryId) => {
   });
 
   const data = await response.json();
+
+  logAuditEvent({
+    action: "deleteCategory",
+    status: response.status,
+    details: categoryId,
+  });
 
   if (response.status === 204) {
     return { status: response.status, data };
@@ -415,6 +447,12 @@ export const createCard = async (card) => {
 
   const data = await response.json();
 
+  logAuditEvent({
+    action: "createCard",
+    status: response.status,
+    details: card.card_name,
+  });
+
   if (response.status === 201) {
     return { status: response.status, data };
   } else if (response.status === 401) {
@@ -441,6 +479,12 @@ export const updateCard = async (card) => {
 
   const data = await response.json();
 
+  logAuditEvent({
+    action: "updateCard",
+    status: response.status,
+    details: card.card_name,
+  });
+
   if (response.status === 200) {
     return { status: response.status, data };
   } else if (response.status === 401) {
@@ -463,6 +507,12 @@ export const deleteCard = async (cardId) => {
   });
 
   const data = await response.json();
+
+  logAuditEvent({
+    action: "deleteCard",
+    status: response.status,
+    details: cardId,
+  });
 
   if (response.status === 204) {
     return { status: response.status, data };

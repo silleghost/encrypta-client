@@ -1,0 +1,26 @@
+.audit-log-viewer {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.audit-log-viewer h3 {
+  color: #333;
+}
+
+.audit-log-viewer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.audit-log-viewer li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.audit-log-viewer li:last-child {
+  border-bottom: none;
+}
