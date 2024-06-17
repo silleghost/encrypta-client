@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PasswordGenerator from "../PasswordGenerator/PasswordGenerator";
 import SecurityAnalysis from "../SecurityAnalysis/SecurityAnalysis";
 import AuditLog from "../AuditLog/AuditLog"; // Added import for AuditLogViewer
+import DataImportExport from "../DataImportExport/DataImportExport"; // Added import for DataImportExport
 import "./ToolsList.css";
 
 const ToolsList = () => {
@@ -19,6 +20,8 @@ const ToolsList = () => {
         return <SecurityAnalysis />;
       case "auditLog": // Added new case for AuditLogViewer
         return <AuditLog />;
+      case "dataImportExport": // Added new case for DataImportExport
+        return <DataImportExport />;
       default:
         return null;
     }
@@ -94,6 +97,12 @@ const ToolsList = () => {
             onClick={() => handleToolClick("auditLog")} // Added list item for AuditLogViewer
           >
             <span className="tool-name">Журнал аудита</span>
+          </li>
+          <li
+            className="tool-item"
+            onClick={() => handleToolClick("dataImportExport")} // Added list item for DataImportExport
+          >
+            <span className="tool-name">Импорт/Экспорт данных</span>
           </li>
         </ul>
       )}
