@@ -8,7 +8,6 @@ import {
   userRegister,
   updateToken,
 } from "../services/authService";
-import { useCryptoKeys } from "../hooks/useKeys";
 
 export const AuthContext = createContext();
 
