@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { getAuditRecords } from "../../../services/auditService";
+import { AuthContext } from "../../../context/AuthContext";
 import "./AuditLog.css";
 
 const AuditLog = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { masterKey, authTokens } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const data = await getAuditRecords();
+        const data = await getAuditRecords(masterKey, authTokens.access);
         setRecords(data);
         setLoading(false);
       } catch (err) {
@@ -28,13 +30,33 @@ const AuditLog = () => {
   return (
     <div className="audit-log-viewer">
       <h3>Журнал аудита</h3>
-      <ul>
-        {records.map((record, index) => (
-          <li key={index}>
-            {record.action} {record.status} {record.details}
-          </li>
-        ))}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Действие</th>
+            <th>Дата и время</th>
+            <th>Детали</th>
+          </tr>
+        </thead>
+        <tbody>
+          {records.map((record, index) => (
+            <tr key={index}>
+              <td>{record.action}</td>
+              <td>
+                {new Date(record.creation_date).toLocaleString("ru-RU", {
+                  year: "numeric",
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              </td>
+              <td>{record.details}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
