@@ -10,7 +10,8 @@ import {
   REGISTER_URL,
   REFRESH_TOKEN_URL,
 } from "../config";
-import { logAuditEvent } from "./auditService"; // Предполагается, что функция логирования находится в auditService.js
+import { logAuditEvent } from "./auditService";
+import { apiRequest } from "./apiService";
 
 //Функция регистрации
 export const userRegister = async (username, email, password, userLogin) => {
@@ -25,28 +26,16 @@ export const userRegister = async (username, email, password, userLogin) => {
     email: email,
   };
 
-  let response = await fetch(BASE_URL + REGISTER_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  let data = await response.json();
+  const response = await apiRequest(
+    BASE_URL + REGISTER_URL,
+    "POST",
+    requestBody,
+    null
+  );
+  const data = await response.json();
 
   if (response.status === 201) {
-    const masterKey = await deriveKey(passwordArray, saltArray);
-    let keyStr = btoa(
-      String.fromCharCode.apply(null, new Uint8Array(masterKey))
-    );
-    localStorage.setItem("masterKey", keyStr);
     userLogin(username, password, null);
-    logAuditEvent({
-      user: username,
-      action: "register",
-      details: "Успешная регистрация",
-    });
   } else {
     throw new Error("Неудачная регистрация");
   }
@@ -58,7 +47,8 @@ export const userLogin = async (
   password,
   totpCode,
   setAuthTokens,
-  setUser
+  setUser,
+  setMasterKey
 ) => {
   const { hashString: hashedUsername, hashArray: saltArray } =
     await generateSalt(username);
@@ -71,29 +61,31 @@ export const userLogin = async (
     totp_code: totpCode,
   };
 
-  let response = await fetch(BASE_URL + LOGIN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  let data = await response.json();
+  const response = await apiRequest(
+    BASE_URL + LOGIN_URL,
+    "POST",
+    requestBody,
+    null
+  );
+  const data = await response.json();
 
   if (response.status === 200) {
     const masterKey = await deriveKey(passwordArray, saltArray);
-    let keyStr = btoa(
-      String.fromCharCode.apply(null, new Uint8Array(masterKey))
+    const exportedKey = await window.crypto.subtle.exportKey("raw", masterKey);
+    const keyAsString = btoa(
+      String.fromCharCode(...new Uint8Array(exportedKey))
     );
-    localStorage.setItem("masterKey", keyStr);
+    setMasterKey(keyAsString);
     setAuthTokens(data);
     setUser(data);
-    logAuditEvent({
-      user: username,
-      action: "login",
-      details: "Успешный вход",
-    });
+    logAuditEvent(
+      JSON.stringify({
+        action: "Выполнен вход",
+        details: username,
+      }),
+      keyAsString,
+      data.access
+    );
     return { status: response.status, data };
   } else if (response.status === 401 && data.message === "Введите TOTP код") {
     throw new Error("Введите TOTP код");

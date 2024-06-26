@@ -7,3 +7,4 @@ export const CATEGORIES_URL = "/vault/api/categories/";
 export const CARDS_URL = "/vault/api/cards/";
 export const AUDIT_URL = "/audit/api/events/";
 export const NOTES_URL = "/notes/api/notes/";
+export const SEND_URL = "/send/";

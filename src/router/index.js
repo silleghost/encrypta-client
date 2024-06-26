@@ -7,11 +7,13 @@ import NotFoundPage from "../pages/NotFoundPage";
 import UserLogout from "../pages/UserLogout";
 import ToolsPage from "../pages/ToolsPage";
 import NotesPage from "../pages/NotesPage";
+import SendPage from "../pages/SendPage";
 
 export const publicRoutes = [
   { path: "/login", element: <LoginPage />, exact: true },
   { path: "/registration", element: <RegistrationPage />, exact: true },
   { path: "/404", element: <NotFoundPage />, exact: true },
+  { path: "/send", element: <SendPage />, exact: false },
 ];
 
 export const privateRoutes = [

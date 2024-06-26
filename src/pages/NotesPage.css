@@ -1,0 +1,173 @@
+.notes-container {
+  font-family: "Arial", sans-serif;
+  margin: 20px auto;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.notes-title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.note-item {
+  list-style-type: none; /* Убираем точки у списка */
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative; /* Добавляем относительное позиционирование для деталей */
+}
+
+.note-item:hover {
+  background-color: #f9f9f9;
+}
+
+.note-details {
+  background-color: #f0f0f0; /* Более нейтральный фон */
+  padding: 15px;
+  border-radius: 0 0 8px 8px;
+  display: block; /* Убрать display: none для постоянного отображения */
+}
+
+.note-detail-item {
+  margin-bottom: 10px;
+}
+
+.note-detail-label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.note-detail-content {
+  display: inline-block;
+  background-color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.custom-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.custom-field-label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.custom-field-value {
+  flex-grow: 1;
+}
+
+.close-note-button {
+  padding: 5px 10px;
+  background-color: #dc3545; /* Красный цвет кнопки */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.close-note-button:hover {
+  background-color: #c82333;
+}
+
+.edit-note-button {
+  display: inline-block; /* Кнопка редактирования в строке с заголовком */
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #ffc107; /* Желтый цвет кнопки */
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-note-button:hover {
+  background-color: #e0a800;
+}
+
+.add-note-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.add-note-button:hover {
+  background-color: #0056b3;
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.note-form input {
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.note-form textarea {
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 120px;
+}
+
+.note-form button {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.note-form button:last-child {
+  margin-bottom: 0;
+}
+
+.note-form button:hover {
+  background-color: #218838;
+}
+
+.custom-field-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.custom-field-key {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.custom-field-value {
+  flex: 2;
+}
+
+.custom-field-checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.add-custom-field-select {
+  margin-bottom: 10px;
+}

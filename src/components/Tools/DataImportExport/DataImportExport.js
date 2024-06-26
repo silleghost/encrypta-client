@@ -1,16 +1,30 @@
-import React, { useContext } from "react";
-import { VaultContext } from "../../../context/VaultContext";
-import { createRecord } from "../../../services/vaultService";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../../../context/AuthContext";
+import { saveObject } from "../../../services/apiService";
+import { BASE_URL, RECORDS_URL } from "../../../config";
 import "./DataImportExport.css";
+import { VaultContext } from "../../../context/VaultContext";
 
 const DataImportExport = () => {
+  const { masterKey, authTokens } = useContext(AuthContext);
   const { records, setRecords } = useContext(VaultContext);
+  const [importFile, setImportFile] = useState(null);
 
   const handleExport = (format) => {
+    if (records.length === 0) {
+      alert("Нет данных для экспорта.");
+      return;
+    }
+
     if (format === "json") {
+      const filteredRecords = records.map(({ id, ...rest }) => rest);
+      if (filteredRecords.every((record) => Object.keys(record).length === 0)) {
+        alert("Нет данных для экспорта после исключения 'id'.");
+        return;
+      }
       const dataStr =
         "data:text/json;charset=utf-8," +
-        encodeURIComponent(JSON.stringify(records));
+        encodeURIComponent(JSON.stringify(filteredRecords));
       const downloadAnchorNode = document.createElement("a");
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", "records.json");
@@ -18,8 +32,14 @@ const DataImportExport = () => {
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
     } else if (format === "csv") {
+      const headers = Object.keys(records[0]).filter(
+        (header) => header !== "id"
+      );
+      if (headers.length === 0) {
+        alert("Нет данных для экспорта после исключения 'id'.");
+        return;
+      }
       const csvRows = [];
-      const headers = Object.keys(records[0]);
       csvRows.push(headers.join(","));
 
       for (const record of records) {
@@ -41,9 +61,8 @@ const DataImportExport = () => {
     }
   };
 
-  const handleImport = async (event, format) => {
-    const file = event.target.files[0];
-    if (!file) return;
+  const handleImportClick = async (format) => {
+    if (!importFile) return;
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -51,10 +70,15 @@ const DataImportExport = () => {
 
       try {
         if (format === "json") {
-          const records = JSON.parse(text);
-          for (const record of records) {
-            await createRecord(record);
-            setRecords((prev) => [...prev, record]);
+          const new_records = JSON.parse(text);
+          for (const record of new_records) {
+            const response = await saveObject(
+              BASE_URL + RECORDS_URL,
+              record,
+              masterKey,
+              authTokens.access
+            );
+            setRecords((prev) => [...prev, response.data]);
           }
         } else if (format === "csv") {
           const rows = text.split("\n");
@@ -66,8 +90,13 @@ const DataImportExport = () => {
               obj[header] = data[index];
               return obj;
             }, {});
-            await createRecord(record);
-            setRecords((prev) => [...prev, record]);
+            const response = await saveObject(
+              BASE_URL + RECORDS_URL,
+              record,
+              masterKey,
+              authTokens.access
+            );
+            setRecords((prev) => [...prev, response.data]);
           }
         }
       } catch (error) {
@@ -75,29 +104,41 @@ const DataImportExport = () => {
       }
     };
 
-    reader.readAsText(file);
+    reader.readAsText(importFile);
   };
 
   return (
     <div className="data-import-export-container">
-      <button
-        className="data-import-export-button"
-        onClick={() => handleExport("json")}
-      >
-        Экспорт JSON
-      </button>
-      <button
-        className="data-import-export-button"
-        onClick={() => handleExport("csv")}
-      >
-        Экспорт CSV
-      </button>
-      <input
-        className="data-import-export-input"
-        type="file"
-        onChange={(e) => handleImport(e, "json")}
-        accept=".json,.csv"
-      />
+      <div className="data-import-export-section">
+        <div className="data-import-export-header">Экспорт данных</div>
+        <button
+          className="data-import-export-button"
+          onClick={() => handleExport("json")}
+        >
+          Экспорт JSON
+        </button>
+        <button
+          className="data-import-export-button"
+          onClick={() => handleExport("csv")}
+        >
+          Экспорт CSV
+        </button>
+      </div>
+      <div className="data-import-export-section">
+        <div className="data-import-export-header">Импорт данных</div>
+        <input
+          className="data-import-export-input"
+          type="file"
+          onChange={(e) => setImportFile(e.target.files[0])}
+          accept=".json,.csv"
+        />
+        <button
+          className="data-import-export-button"
+          onClick={() => handleImportClick("json")}
+        >
+          Импорт данных
+        </button>
+      </div>
     </div>
   );
 };

@@ -78,9 +78,7 @@ export async function deriveKey(passwordArray, saltArray) {
     ["encrypt", "decrypt"]
   );
 
-  const exportedKey = await crypto.subtle.exportKey("raw", cryptoKey);
-
-  return exportedKey;
+  return cryptoKey;
 }
 
 export async function aesEncrypt(data, masterKey) {

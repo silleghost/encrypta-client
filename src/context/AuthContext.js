@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthTokens } from "../hooks/useAuthTokens";
 import { useUser } from "../hooks/useUser";
+import { useMasterKey } from "../hooks/useMasterKey";
 import {
   userLogin,
   userLogout,
@@ -15,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [authTokens, setAuthTokens] = useAuthTokens();
   const [user, setUser] = useUser();
   const [loading, setLoading] = useState(true);
-  const history = useNavigate();
+  const [masterKey, setMasterKey] = useMasterKey();
 
   useEffect(() => {
     if (loading) {
@@ -34,11 +35,26 @@ export const AuthProvider = ({ children }) => {
   const contextData = {
     user,
     authTokens,
+    masterKey,
     userLogin: (username, password, totpCode) =>
-      userLogin(username, password, totpCode, setAuthTokens, setUser),
+      userLogin(
+        username,
+        password,
+        totpCode,
+        setAuthTokens,
+        setUser,
+        setMasterKey
+      ),
     userRegister: (username, email, password) =>
       userRegister(username, email, password, (username, password, totpCode) =>
-        userLogin(username, password, totpCode, setAuthTokens, setUser)
+        userLogin(
+          username,
+          password,
+          totpCode,
+          setAuthTokens,
+          setUser,
+          setMasterKey
+        )
       ),
     userLogout: () => userLogout(setAuthTokens, setUser),
   };

@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { getRecords, getCategories, getCards } from "../services/vaultService";
+import { useAuthTokens } from "../hooks/useAuthTokens";
+import { getObjects } from "../services/apiService";
+import { BASE_URL, RECORDS_URL, CATEGORIES_URL, CARDS_URL } from "../config";
 
 export const VaultContext = createContext();
 
@@ -13,12 +15,17 @@ export const VaultProvider = ({ children }) => {
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [error, setError] = useState(null);
 
-  const { userLogout } = useContext(AuthContext);
+  const { masterKey, userLogout } = useContext(AuthContext);
+  const [authTokens] = useAuthTokens();
 
   const fetchRecords = async () => {
     try {
       setIsLoadingRecords(true);
-      const response = await getRecords();
+      const response = await getObjects(
+        BASE_URL + RECORDS_URL,
+        masterKey,
+        authTokens.access
+      );
       setRecords(response.data);
     } catch (error) {
       if (error.message === "Неавторизован") {
@@ -34,7 +41,11 @@ export const VaultProvider = ({ children }) => {
   const fetchCategories = async () => {
     try {
       setIsLoadingCategories(true);
-      const response = await getCategories();
+      const response = await getObjects(
+        BASE_URL + CATEGORIES_URL,
+        masterKey,
+        authTokens.access
+      );
       setCategories(response.data);
     } catch (error) {
       if (error.message === "Неавторизован") {
@@ -50,7 +61,11 @@ export const VaultProvider = ({ children }) => {
   const fetchCards = async () => {
     try {
       setIsLoadingCards(true);
-      const response = await getCards();
+      const response = await getObjects(
+        BASE_URL + CARDS_URL,
+        masterKey,
+        authTokens.access
+      );
       setCards(response.data);
     } catch (error) {
       if (error.message === "Неавторизован") {

@@ -130,11 +130,11 @@ export const createNote = async (note) => {
   });
 
   const data = await response.json();
-  logAuditEvent({
-    action: "createNote",
-    status: response.status,
-    details: note.title,
-  });
+  // logAuditEvent({
+  //   action: "createNote",
+  //   status: response.status,
+  //   details: note.title,
+  // });
 
   if (response.status === 201) {
     return { status: response.status, data };
@@ -162,11 +162,11 @@ export const updateNote = async (note) => {
   if (response.status === 200) {
     const updatedEncryptedNote = await response.json();
     const updatedNote = await decryptNote(updatedEncryptedNote);
-    logAuditEvent({
-      action: "updateNote",
-      status: response.status,
-      details: note.title,
-    });
+    // logAuditEvent({
+    //   action: "updateNote",
+    //   status: response.status,
+    //   details: note.title,
+    // });
     return { status: response.status, data: updatedNote };
   } else if (response.status === 401) {
     throw new Error("Неавторизован");

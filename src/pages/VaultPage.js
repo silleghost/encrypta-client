@@ -7,22 +7,14 @@ import Loading from "../components/UI/loading/Loading";
 import MyModal from "../components/UI/modal/MyModal";
 import RecordModal from "../modals/RecordModal";
 import OptionsSelect from "../components/UI/select/OptionsSelect";
-import {
-  createRecord,
-  updateRecord,
-  deleteRecord,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-  createCard,
-  updateCard,
-  deleteCard,
-} from "../services/vaultService";
 import ErrorNotifications from "../components/Vault/ErrorNotifications";
 import SidePanel from "../components/Vault/SidePanel/SidePanel";
 import EmptyVault from "../components/Vault/EmptyVault/EmptyVault";
 import FilterIndicator from "../components/Vault/FilterIndicator/FilterIndicator";
-import CardList from "../components/Vault/CardList/CardList"; // New import for CardList component
+import CardList from "../components/Vault/CardList/CardList";
+import { deleteObject, saveObject } from "../services/apiService";
+import { AuthContext } from "../context/AuthContext";
+import { BASE_URL, RECORDS_URL, CATEGORIES_URL, CARDS_URL } from "../config";
 
 const VaultPage = () => {
   const {
@@ -39,8 +31,10 @@ const VaultPage = () => {
   const options = [
     { label: "Запись", modalName: "modal-new-record" },
     { label: "Категорию", modalName: "modal-new-category" },
-    { label: "Банковская карта", modalName: "modal-new-card" },
+    { label: "Банковскую карту", modalName: "modal-new-card" },
   ];
+
+  const { masterKey, authTokens } = useContext(AuthContext);
 
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -50,7 +44,7 @@ const VaultPage = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
-  const [filterType, setFilterType] = useState("all"); // 'record', 'card', 'all'
+  const [filterType, setFilterType] = useState("all");
 
   const filteredRecords = useMemo(() => {
     const filteredBySearch = records.filter(
@@ -132,44 +126,42 @@ const VaultPage = () => {
     setSelectedRecord(null);
   };
 
-  const handleSaveRecord = async (record) => {
-    try {
-      const isNewRecord = !record.id;
-      const response = isNewRecord
-        ? await createRecord(record)
-        : await updateRecord(record);
-
-      setRecords((prevRecords) => {
-        if (isNewRecord) {
-          record.id = response.data.id;
-          // Добавляем новую запись с id из ответа сервера
-          return [...prevRecords, record];
-        } else {
-          // Обновляем запись в списке, используя данные из ответа сервера
-          return prevRecords.map((r) =>
-            r.id === record.id ? { ...record, ...response } : r
-          );
-        }
-      });
-    } catch (error) {
-      handleError(error.message);
-    } finally {
-      // handleCloseModal();
+  const handleSave = async (type, item) => {
+    let url;
+    let setFunction;
+    switch (type) {
+      case "record":
+        url = BASE_URL + RECORDS_URL;
+        setFunction = setRecords;
+        break;
+      case "category":
+        url = BASE_URL + CATEGORIES_URL;
+        setFunction = setCategories;
+        break;
+      case "card":
+        url = BASE_URL + CARDS_URL;
+        setFunction = setCards;
+        break;
+      default:
+        return;
     }
-  };
 
-  const handleSaveCategory = async (category) => {
     try {
-      const isNewCategory = !category.id;
-      const response = isNewCategory
-        ? await createCategory(category)
-        : await updateCategory(category);
-      setCategories((prevCategories) => {
-        if (isNewCategory) {
-          return [...prevCategories, category];
+      const response = await saveObject(
+        url,
+        item,
+        masterKey,
+        authTokens.access
+      );
+      setFunction((prevItems) => {
+        if (!item.id) {
+          item.id = response.data.id;
+          return [...prevItems, item];
         } else {
-          return prevCategories.map((c) =>
-            c.id === category.id ? category : c
+          return prevItems.map((existingItem) =>
+            existingItem.id === item.id
+              ? { ...item, ...item.data }
+              : existingItem
           );
         }
       });
@@ -180,88 +172,35 @@ const VaultPage = () => {
     }
   };
 
-  const handleSaveCard = async (card) => {
-    try {
-      const isNewCard = !card.id;
-      const response = isNewCard
-        ? await createCard(card)
-        : await updateCard(card);
-
-      setCards((prevCards) => {
-        if (isNewCard) {
-          card.id = response.data.id;
-          // Добавляем новую запись с id из ответа сервера
-          return [...prevCards, card];
-        } else {
-          // Обновляем запись в списке, используя даннные из ответа сервера
-          return prevCards.map((c) =>
-            c.id === card.id ? { ...card, ...response } : c
-          );
-        }
-      });
-    } catch (error) {
-      handleError(error.message);
-    } finally {
-      // handleCloseModal();
+  const handleDelete = async (type, data) => {
+    let url;
+    let setFunction;
+    switch (type) {
+      case "record":
+        url = BASE_URL + RECORDS_URL;
+        setFunction = setRecords;
+        break;
+      case "category":
+        url = BASE_URL + CATEGORIES_URL;
+        setFunction = setCategories;
+        break;
+      case "card":
+        url = BASE_URL + CARDS_URL;
+        setFunction = setCards;
+        break;
+      default:
+        return;
     }
-  };
 
-  const handleDeleteRecord = async (recordId) => {
     try {
-      await deleteRecord(recordId);
-
-      setRecords((prevRecords) =>
-        prevRecords.filter((record) => record.id !== recordId)
+      await deleteObject(url, data, masterKey, authTokens.access);
+      setFunction((prevItems) =>
+        prevItems.filter((item) => item.id !== data.id)
       );
     } catch (error) {
       handleError(error.message);
     } finally {
       handleCloseModal();
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId) => {
-    try {
-      await deleteCategory(categoryId);
-      setCategories((prevCategories) =>
-        prevCategories.filter((category) => category.id !== categoryId)
-      );
-    } catch (error) {
-      handleError(error.message);
-    } finally {
-      handleCloseModal();
-    }
-  };
-
-  const handleDeleteCard = async (cardId) => {
-    try {
-      await deleteCard(cardId);
-
-      setCards((prevCards) => prevCards.filter((card) => card.id !== cardId));
-    } catch (error) {
-      handleError(error.message);
-    } finally {
-      handleCloseModal();
-    }
-  };
-
-  const handleSave = (type, data) => {
-    if (type === "record") {
-      handleSaveRecord(data);
-    } else if (type === "category") {
-      handleSaveCategory(data);
-    } else if (type === "card") {
-      handleSaveCard(data);
-    }
-  };
-
-  const handleDelete = (type, data) => {
-    if (type === "record") {
-      handleDeleteRecord(data.id);
-    } else if (type === "category") {
-      handleDeleteCategory(data.id);
-    } else if (type === "card") {
-      handleDeleteCard(data.id);
     }
   };
 
@@ -307,7 +246,7 @@ const VaultPage = () => {
 
       {isLoadingRecords ? (
         <Loading />
-      ) : records.length === 0 ? (
+      ) : records.length === 0 && cards.length === 0 ? (
         <div>
           <EmptyVault />
           <OptionsSelect
@@ -322,6 +261,8 @@ const VaultPage = () => {
             onSearch={handleSearch}
             onFilterCategory={handleFilterCategory}
             onFilterType={handleFilterType}
+            masterKey={masterKey}
+            authToken={authTokens.access}
           />
           <div className="right-block">
             {(searchTerm || filterByCategory || filterType !== "all") && (
@@ -348,8 +289,8 @@ const VaultPage = () => {
           category={selectedCategory}
           categories={categories}
           modalType={modalType}
-          onSave={handleSave}
-          onDelete={handleDelete}
+          onSave={(type, data) => handleSave(type, data)}
+          onDelete={(type, data) => handleDelete(type, data)}
           onClose={handleCloseModal}
         />
       </MyModal>

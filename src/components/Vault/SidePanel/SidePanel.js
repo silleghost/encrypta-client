@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { VaultContext } from "../../../context/VaultContext";
+import { deleteObject } from "../../../services/apiService";
+import { BASE_URL, CATEGORIES_URL } from "../../../config";
 import "./SidePanel.css";
 
 const SidePanel = ({
@@ -7,6 +9,8 @@ const SidePanel = ({
   onFilterCategory,
   onFilterType,
   activeFilterType,
+  masterKey,
+  authToken,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -37,6 +41,20 @@ const SidePanel = ({
     onFilterCategory(category);
   };
 
+  const handleDeleteCategory = async (event, category) => {
+    event.stopPropagation();
+    try {
+      await deleteObject(
+        BASE_URL + CATEGORIES_URL,
+        category,
+        masterKey,
+        authToken
+      );
+    } catch (error) {
+      console.error("Ошибка при удалении категории:", error);
+    }
+  };
+
   return (
     <div className="side-panel">
       <div className="search-box">
@@ -57,6 +75,12 @@ const SidePanel = ({
               onClick={() => handleCategoryFilter(category)}
             >
               {category.name}
+              <span
+                className="delete-icon"
+                onClick={(event) => handleDeleteCategory(event, category)}
+              >
+                &#10005;
+              </span>
             </span>
           ))}
         </div>

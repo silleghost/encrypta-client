@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { privateRoutes, publicRoutes } from "../router";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import PrivateRoute from "../utils/PrivateRoute";
-import PublicRoute from "../utils/PublicRoute";
 import { VaultProvider } from "../context/VaultContext";
 
 const AppRouter = () => {

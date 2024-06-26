@@ -1,83 +1,158 @@
-import React, { useState, useEffect } from "react";
-import NotesList from "../components/Notes/NotesList";
-import NoteModal from "../modals/NoteModal";
-import { aesEncrypt, aesDecrypt } from "../crypto";
+import React, { useEffect, useState, useContext } from "react";
+import { getObjects, saveObject } from "../services/apiService";
+import { BASE_URL, NOTES_URL } from "../config";
+import "../pages/NotesPage.css";
 import NavigationPanel from "../components/Navbar/NavigationPanel";
-import {
-  createNote,
-  updateNote,
-  deleteNote,
-  getNotes,
-} from "../services/notesService";
+import { AuthContext } from "../context/AuthContext";
+import NoteForm from "../forms/NoteForm";
 
 const NotesPage = () => {
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
 
-  const handleNoteSelect = (note) => {
-    setSelectedNote(note);
-    setModalVisible(true);
-  };
-
-  const handleSave = async (note) => {
-    const encryptedContent = await aesEncrypt(
-      new TextEncoder().encode(note.content)
-    );
-    let savedNote;
-    if (note.id) {
-      savedNote = await updateNote(note);
-    } else {
-      savedNote = await createNote(note);
-    }
-    if (!note.id) {
-      setNotes([...notes, savedNote.data]); // Добавляем новую заметку в список
-    } else {
-      const updatedNotes = notes.map((n) =>
-        n.id === savedNote.data.id ? savedNote.data : n
-      );
-      setNotes(updatedNotes); // Обновляем список заметок
-    }
-    setModalVisible(false);
-  };
-
-  const handleDelete = async (note) => {
-    await deleteNote(note.id);
-    setNotes(notes.filter((n) => n.id !== note.id)); // Удаляем заметку из списка
-    setModalVisible(false);
-  };
-
-  const handleAddNote = () => {
-    const newNote = { content: "", id: null }; // Создаем новую заметку с пустым содержанием и без ID
-    setSelectedNote(newNote);
-    setModalVisible(true);
-  };
-
-  const fetchNotes = async () => {
-    const fetchedNotes = await getNotes(); // Загрузка заметок из API
-    setNotes(fetchedNotes.data); // Обновление состояния заметок
-  };
+  const { masterKey, authTokens } = useContext(AuthContext);
 
   useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const result = await getObjects(
+          BASE_URL + NOTES_URL,
+          masterKey,
+          authTokens.access
+        );
+
+        setNotes(result.data);
+      } catch (error) {
+        console.error("Ошибка при загрузке заметок:", error);
+      }
+    };
+
     fetchNotes();
   }, []);
 
+  const handleSelectNote = (note) => {
+    setSelectedNote(note);
+  };
+
+  const handleAddNote = () => {
+    setIsAddingNote(!isAddingNote);
+  };
+
+  const handleSubmit = async (note) => {
+    const formData = {
+      id: note.id,
+      title: note.title,
+      content: note.content,
+      custom_fields: note.customFields,
+    };
+
+    try {
+      const saveResult = await saveObject(
+        BASE_URL + NOTES_URL,
+        formData,
+        masterKey,
+        authTokens.access
+      );
+      setIsAddingNote(false); // Закрыть форму после сохранения
+    } catch (error) {
+      console.error("Ошибка при сохранении заметки:", error);
+    }
+  };
+
+  const handleEditNote = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = (note) => {
+    handleSubmit(note);
+    setIsEditing(false);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedNote(null); // Сброс выбранной заметки для закрытия деталей
+  };
+
   return (
-    <div>
+    <>
       <NavigationPanel />
-      <button onClick={handleAddNote}>Добавить заметку</button>{" "}
-      {/* Кнопка для добавления новой заметки */}
-      <NotesList notes={notes} onNoteSelect={handleNoteSelect} />
-      {selectedNote && (
-        <NoteModal
-          note={selectedNote}
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onSave={handleSave}
-          onDelete={handleDelete}
-        />
-      )}
-    </div>
+      <div className="notes-container">
+        <h2 className="notes-title">Заметки</h2>
+        <ul>
+          {notes.map((note, index) => (
+            <React.Fragment key={index}>
+              <li
+                className={`note-item ${
+                  selectedNote && selectedNote.id === note.id ? "active" : ""
+                }`}
+                onClick={() => handleSelectNote(note)}
+              >
+                {note.title}
+              </li>
+              {selectedNote && selectedNote.id === note.id && (
+                <div className="note-details">
+                  {!isEditing ? (
+                    <>
+                      <div className="note-detail-item">
+                        <span className="note-detail-label">Заголовок:</span>
+                        <span className="note-detail-content">
+                          {selectedNote.title}
+                        </span>
+                      </div>
+                      <div className="note-detail-item">
+                        <span className="note-detail-label">Содержание:</span>
+                        <span className="note-detail-content">
+                          {selectedNote.content}
+                        </span>
+                      </div>
+                      {selectedNote.customFields &&
+                        selectedNote.customFields.map((field, index) => (
+                          <div className="custom-field" key={index}>
+                            <span className="custom-field-label">
+                              {field.key}:
+                            </span>
+                            <span className="custom-field-value">
+                              {field.type === "boolean"
+                                ? field.value === "true"
+                                  ? "Да"
+                                  : "Нет"
+                                : field.value}
+                            </span>
+                          </div>
+                        ))}
+                      <button
+                        className="edit-note-button"
+                        onClick={handleEditNote}
+                      >
+                        Редактировать
+                      </button>
+                    </>
+                  ) : (
+                    <NoteForm
+                      initialRecord={selectedNote}
+                      onSave={handleSaveEdit}
+                      masterKey={masterKey}
+                      authToken={authTokens.access}
+                    />
+                  )}
+                  <button
+                    className="close-note-button"
+                    onClick={handleCloseDetails}
+                  >
+                    Закрыть
+                  </button>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </ul>
+        <button className="add-note-button" onClick={handleAddNote}>
+          Добавить заметку
+        </button>
+        {isAddingNote && <NoteForm onSave={handleSubmit} />}
+      </div>
+    </>
   );
 };
 
